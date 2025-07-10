@@ -1,4 +1,4 @@
-import { GameState, GameStatus, Player } from './types/game';
+import { GameState, GameStatus, Player } from '@/common/types/game';
 
 // The single, in-memory game state object (Singleton)
 export let gameState: GameState = {

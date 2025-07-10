@@ -1,4 +1,4 @@
-import { Question } from '../types/game';
+import { Question } from '@/common/types/game';
 
 export const dummyQuestions: Question[] = [
   {

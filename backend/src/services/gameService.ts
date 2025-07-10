@@ -1,6 +1,6 @@
 // src/services/gameService.ts
 import { gameState, updateGameState, resetGame as resetGameState } from '../game';
-import { Player, GameStatus, Question } from '../types/game';
+import { Player, GameStatus, Question } from '@/common/types/game';
 import { broadcastGameState } from '../websocket';
 import { config } from '../config';
 import { dummyQuestions } from '../data/questions';

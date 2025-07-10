@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import { Server } from 'http';
 import { gameState } from './game';
-import { WebSocketMessage, PlayerJoinPayload, AdminActionPayload, SubmitAnswerPayload } from './types/messages';
+import { WebSocketMessage, PlayerJoinPayload, AdminActionPayload, SubmitAnswerPayload } from '@/common/types/messages';
 import { handlePlayerJoin, handleAdminStartGame, handleAdminResetGame, handleSubmitAnswer } from './services/gameService';
 
 // Extend the WebSocket type to hold our player ID

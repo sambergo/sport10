@@ -8,11 +8,11 @@ This plan outlines the steps to build the React frontend for the Smart10 game, c
     *   Establishing and maintaining the WebSocket connection.
     *   Sending messages to the server.
     *   Receiving messages from the server.
-*   [ ] **Global State Management:** Set up a global state management solution (e.g., Zustand or React Context) to store the `GameState` received from the server. This will allow any component in the app to react to real-time updates.
+*   [ ] **Global State Management (Zustand):** Set up Zustand to create a global store for the `GameState` received from the server. This will allow any component in the app to react to real-time updates.
     *   The WebSocket service will update this global store upon receiving a `game_state_update` message.
 
-**Phase 2: Component Scaffolding**
-*   [ ] **Create Component Files:** Based on the `PLAN.md`, create the following presentational components in `src/components`:
+**Phase 2: Component Scaffolding (with shadcn/ui)**
+*   [ ] **Create Component Files:** Based on the `PLAN.md`, create the following presentational components in `src/components`. Utilize `shadcn/ui` components (e.g., Button, Input, Card) where appropriate.
     *   `Header.tsx`: To display game status, round number, and the timer.
     *   `PlayerList.tsx`: To display the list of players and their scores.
     *   `QuestionDisplay.tsx`: To show the current question and its category/difficulty.
@@ -37,7 +37,7 @@ This plan outlines the steps to build the React frontend for the Smart10 game, c
 *   [ ] **Implement Timer:** In the `Header` component, create a visual countdown timer that syncs with the `gameState.timer` value.
 
 **Phase 5: Styling & UX Refinements**
-*   [ ] **Apply CSS:** Add styling to all components to ensure the UI is clear, responsive, and visually appealing.
+*   [ ] **Apply Styling (with shadcn/ui & Tailwind CSS):** Style all components using Tailwind CSS and `shadcn/ui` to ensure the UI is clear, responsive, and visually appealing.
 *   [ ] **Visual Feedback:** Add visual cues for user actions, such as:
     *   Disabling the "Submit" button after answers have been sent.
     *   Highlighting selected answers.

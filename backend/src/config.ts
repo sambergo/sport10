@@ -2,7 +2,7 @@
 
 export const config = {
   adminPassword: 'pw',
-  winScore: 30,
+  winScore: 5,
   timeLimitSeconds: 45,
   playerLimit: 8,
   inactiveTimeout: 2,

@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { PlayerList } from '@/components/PlayerList';
 import { QuestionDisplay } from '@/components/QuestionDisplay';
 import { AnswerOptions } from '@/components/AnswerOptions';
+import { GameActions } from '@/components/GameActions';
 
 export function GameView() {
   return (
@@ -12,6 +13,7 @@ export function GameView() {
         <div className="md:col-span-2">
           <QuestionDisplay />
           <AnswerOptions />
+          <GameActions />
         </div>
         <div>
           <PlayerList />

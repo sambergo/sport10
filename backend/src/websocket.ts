@@ -62,6 +62,8 @@ function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): voi
       const player = handlePlayerJoin(name);
       if (player) {
         ws.playerId = player.id; // Associate player ID with this connection
+        // Send a confirmation back to the joining player with their details
+        ws.send(JSON.stringify({ type: 'player_joined', payload: player }));
       } else {
         ws.send(JSON.stringify({ type: 'error', payload: { message: 'Failed to join game. It might be full or in progress.' } }));
       }

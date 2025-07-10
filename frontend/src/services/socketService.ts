@@ -1,11 +1,12 @@
 // src/services/socketService.ts
-import type { GameState } from '../../../common/types/game';
+import type { GameState, Player } from '../../../common/types/game';
 import type { WebSocketMessage } from '../../../common/types/messages';
 import { useGameStore } from '../store/gameStore';
 
 const WEBSOCKET_URL = 'ws://localhost:3001';
 
 let socket: WebSocket | null = null;
+let playerId: string | null = null; // Store player ID locally in the service
 
 function connect(): void {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
@@ -17,6 +18,7 @@ function connect(): void {
 
   socket.onopen = () => {
     console.log('WebSocket connection established.');
+    // If we have a player ID, maybe we need to re-identify? For now, we don't.
   };
 
   socket.onmessage = (event) => {
@@ -24,11 +26,20 @@ function connect(): void {
       const message: WebSocketMessage<any> = JSON.parse(event.data);
       console.log('Received message:', message);
 
-      if (message.type === 'game_state_update') {
-        useGameStore.getState().setGameState(message.payload as GameState);
-      } else if (message.type === 'error') {
-        // Here you could update the store with an error state
-        console.error('Server error:', message.payload.message);
+      switch (message.type) {
+        case 'game_state_update':
+          useGameStore.getState().setGameState(message.payload as GameState);
+          break;
+        case 'player_joined': // Assuming backend sends this custom message
+          const player = message.payload as Player;
+          playerId = player.id;
+          useGameStore.getState().setPlayerId(player.id);
+          break;
+        case 'error':
+          console.error('Server error:', message.payload.message);
+          break;
+        default:
+          console.warn('Unhandled message type:', message.type);
       }
     } catch (error) {
       console.error('Failed to parse server message:', error);
@@ -37,7 +48,6 @@ function connect(): void {
 
   socket.onclose = () => {
     console.log('WebSocket connection closed. Attempting to reconnect...');
-    // Simple reconnect logic
     setTimeout(connect, 3000);
   };
 
@@ -60,7 +70,9 @@ function sendMessage<T>(type: string, payload: T): void {
 
 export const socketService = {
   connect,
+  getPlayerId: () => playerId,
   joinGame: (name: string) => {
+    // We don't have the ID yet, backend will send it.
     sendMessage('player_join', { name });
   },
   startGame: (password: string) => {
@@ -69,7 +81,10 @@ export const socketService = {
   resetGame: (password: string) => {
     sendMessage('admin_reset_game', { password });
   },
-  submitAnswer: (answerIndices: number[]) => {
-    sendMessage('submit_answer', { answerIndices });
+  submitAnswer: (answerIndex: number) => {
+    sendMessage('submit_answer', { answerIndex });
+  },
+  passTurn: () => {
+    sendMessage('pass_turn', {});
   },
 };

@@ -3,8 +3,8 @@ import { useGameStore } from '@/store/gameStore';
 import { socketService } from '@/services/socketService';
 
 export function GameActions() {
-  const { activePlayerId, status, players } = useGameStore((state) => state.gameState);
-  const myPlayerId = useGameStore((state) => state.playerId);
+  const { activePlayerId, status, players } = useGameStore((state: any) => state.gameState);
+  const myPlayerId = useGameStore((state: any) => state.playerId);
 
   const handlePassTurn = () => {
     socketService.passTurn();
@@ -57,7 +57,7 @@ export function GameActions() {
           </p>
         ) : (
           <p className="text-small text-[var(--color-text-secondary)]">
-            Waiting for {players.find(p => p.id === activePlayerId)?.name || 'other player'}
+            Waiting for {players.find((p: any) => p.id === activePlayerId)?.name || 'other player'}
           </p>
         )}
       </div>

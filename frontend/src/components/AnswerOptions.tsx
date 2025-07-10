@@ -1,11 +1,10 @@
 // src/components/AnswerOptions.tsx
-import React from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { socketService } from '@/services/socketService';
 
 export function AnswerOptions() {
-  const { currentQuestion, status, activePlayerId, players } = useGameStore((state) => state.gameState);
-  const myPlayerId = useGameStore((state) => state.playerId);
+  const { currentQuestion, status, activePlayerId, players } = useGameStore((state: any) => state.gameState);
+  const myPlayerId = useGameStore((state: any) => state.playerId);
 
   if (!currentQuestion) return null;
 
@@ -16,7 +15,7 @@ export function AnswerOptions() {
   const isMyTurn = activePlayerId === myPlayerId;
   const isAnsweringPhase = status === 'Answering';
 
-  const revealedCorrectAnswers = players.flatMap(p => p.roundAnswers);
+  const revealedCorrectAnswers = players.flatMap((p: any) => p.roundAnswers);
   const revealedIncorrectAnswers = currentQuestion.revealedIncorrectAnswers || [];
 
   // Letter mapping for answer options
@@ -26,7 +25,7 @@ export function AnswerOptions() {
     <div className="animate-scale-in">
       {/* Answer Grid */}
       <div className="grid grid-cols-2 gap-3">
-        {currentQuestion.options.map((option, index) => {
+        {currentQuestion.options.map((option: any, index: number) => {
           const isRevealedCorrect = revealedCorrectAnswers.includes(index);
           const isRevealedIncorrect = revealedIncorrectAnswers.includes(index);
           const isRevealed = isRevealedCorrect || isRevealedIncorrect;
@@ -81,7 +80,7 @@ export function AnswerOptions() {
               <>
                 <span className="w-3 h-3 bg-[var(--color-text-accent)] rounded-full"></span>
                 <span className="text-caption text-[var(--color-text-secondary)]">
-                  Waiting for {players.find(p => p.id === activePlayerId)?.name || 'other player'}...
+                  Waiting for {players.find((p: any) => p.id === activePlayerId)?.name || 'other player'}...
                 </span>
               </>
             )}

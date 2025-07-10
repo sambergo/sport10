@@ -1,5 +1,3 @@
-import { GameState, Player } from './game';
-
 // A generic structure for all messages
 export interface WebSocketMessage<T> {
   type: string;

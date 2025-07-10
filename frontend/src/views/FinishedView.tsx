@@ -5,8 +5,8 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function FinishedView() {
-  const { players } = useGameStore((state) => state.gameState);
-  const winner = players.sort((a, b) => b.score - a.score)[0];
+  const { players } = useGameStore((state: any) => state.gameState);
+  const winner = players.sort((a: any, b: any) => b.score - a.score)[0];
 
   return (
     <div className="container mx-auto p-4 max-w-2xl text-center">

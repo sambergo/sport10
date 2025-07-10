@@ -2,8 +2,8 @@
 import { useGameStore } from '@/store/gameStore';
 
 export function PlayerList() {
-  const { players, activePlayerId } = useGameStore((state) => state.gameState);
-  const myPlayerId = useGameStore((state) => state.playerId);
+  const { players, activePlayerId } = useGameStore((state: any) => state.gameState);
+  const myPlayerId = useGameStore((state: any) => state.playerId);
 
   // Auto-assign avatars based on player ID or index
   const getPlayerAvatar = (playerId: string, index: number) => {
@@ -138,19 +138,19 @@ export function PlayerList() {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <div className="text-subtitle font-bold text-[var(--color-blue-primary)]">
-              {players.filter(p => p.roundStatus === 'in_round').length}
+              {players.filter((p: any) => p.roundStatus === 'in_round').length}
             </div>
             <div className="text-small text-[var(--color-text-secondary)]">Active</div>
           </div>
           <div>
             <div className="text-subtitle font-bold text-[var(--color-orange-primary)]">
-              {players.filter(p => p.roundStatus === 'passed').length}
+              {players.filter((p: any) => p.roundStatus === 'passed').length}
             </div>
             <div className="text-small text-[var(--color-text-secondary)]">Passed</div>
           </div>
           <div>
             <div className="text-subtitle font-bold text-[var(--color-status-error)]">
-              {players.filter(p => p.roundStatus === 'out').length}
+              {players.filter((p: any) => p.roundStatus === 'out').length}
             </div>
             <div className="text-small text-[var(--color-text-secondary)]">Out</div>
           </div>

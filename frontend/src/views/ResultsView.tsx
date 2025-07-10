@@ -6,7 +6,7 @@ import { useGameStore } from '@/store/gameStore';
 import { Button } from '@/components/ui/button';
 
 export function ResultsView() {
-  const { currentQuestion } = useGameStore((state) => state.gameState);
+  const { currentQuestion } = useGameStore((state: any) => state.gameState);
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -19,7 +19,7 @@ export function ResultsView() {
             <div className="mt-4">
               <h3 className="text-lg font-semibold mb-2">Correct Answers:</h3>
               <div className="grid grid-cols-2 gap-4">
-                {currentQuestion.options.map((option, index) => (
+                {currentQuestion.options.map((option: any, index: number) => (
                   <Button
                     key={index}
                     variant={option.isCorrect ? 'default' : 'outline'}

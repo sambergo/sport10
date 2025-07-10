@@ -1,5 +1,5 @@
 // src/views/LobbyView.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +10,8 @@ import { useGameStore } from '@/store/gameStore';
 
 export function LobbyView() {
   const [playerName, setPlayerName] = useState('');
-  const { players } = useGameStore((state) => state.gameState);
-  const myPlayer = players.find(p => p.name === playerName && p.id); // A simple way to check if we have joined
+  const { players } = useGameStore((state: any) => state.gameState);
+  const myPlayer = players.find((p: any) => p.name === playerName && p.id); // A simple way to check if we have joined
 
   const handleJoinGame = () => {
     if (playerName.trim()) {
@@ -32,7 +32,7 @@ export function LobbyView() {
               <Input
                 placeholder="Enter your name"
                 value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
+                onChange={(e: any) => setPlayerName(e.target.value)}
                 disabled={!!myPlayer}
               />
               <Button onClick={handleJoinGame} className="w-full" disabled={!!myPlayer || !playerName.trim()}>

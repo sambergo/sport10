@@ -3,7 +3,7 @@ import { useGameStore } from '@/store/gameStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function Scoreboard() {
-  const players = useGameStore((state) => state.gameState.players);
+  const players = useGameStore((state: any) => state.gameState.players);
 
   // Sort players by score for the leaderboard
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);

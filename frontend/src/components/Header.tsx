@@ -2,7 +2,7 @@
 import { useGameStore } from '@/store/gameStore';
 
 export function Header() {
-  const { status, currentRound, timer, questions } = useGameStore((state) => state.gameState);
+  const { status, currentRound, timer, questions } = useGameStore((state: any) => state.gameState);
   const currentQuestion = questions && currentRound <= questions.length ? questions[currentRound - 1] : null;
   
   // Determine timer color based on time remaining

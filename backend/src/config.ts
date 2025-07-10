@@ -1,7 +1,7 @@
 // src/config.ts
 
 export const config = {
-  adminPassword: 'smart10-password',
+  adminPassword: 'pw',
   winScore: 30,
   timeLimitSeconds: 45,
   playerLimit: 8,

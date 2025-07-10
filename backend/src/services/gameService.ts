@@ -123,21 +123,19 @@ export function handleSubmitAnswer(playerId: string, answerIndex: number): boole
         player.roundAnswers.push(answerIndex);
         console.log(`Player ${player.name} answered correctly.`);
 
-        // Check if all correct answers have been found
         const revealedAnswers = gameState.players.flatMap(p => p.roundAnswers);
         const totalCorrectAnswers = question.options.filter(o => o.isCorrect).length;
 
         if (revealedAnswers.length === totalCorrectAnswers) {
             endRound();
         } else {
-            // The turn stays with the player, just broadcast the updated state
-            broadcastGameState();
+            advanceTurn();
         }
     } else {
         player.roundScore = 0; // Lose all points from the round
         player.roundStatus = 'out';
         console.log(`Player ${player.name} answered incorrectly and is out of the round.`);
-        advanceTurn(); // This handles the broadcast and moves to the next player
+        advanceTurn();
     }
 
     return true;

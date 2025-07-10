@@ -3,16 +3,16 @@
 This plan outlines the steps to build the React frontend for the Smart10 game, consuming the WebSocket API from the backend.
 
 **Phase 1: Project Setup & Core Services**
-*   [ ] **Use Shared Types:** Import and use the shared TypeScript interfaces (`GameState`, `Player`, etc.) from the `@/common/types` directory. This avoids duplication and ensures consistency between the frontend and backend.
-*   [ ] **WebSocket Service:** Create a `src/services/socketService.ts` module. This service will be responsible for:
+*   [x] **Use Shared Types:** Import and use the shared TypeScript interfaces (`GameState`, `Player`, etc.) from the `@/common/types` directory. This avoids duplication and ensures consistency between the frontend and backend.
+*   [x] **WebSocket Service:** Create a `src/services/socketService.ts` module. This service will be responsible for:
     *   Establishing and maintaining the WebSocket connection.
     *   Sending messages to the server.
     *   Receiving messages from the server.
-*   [ ] **Global State Management (Zustand):** Set up Zustand to create a global store for the `GameState` received from the server. This will allow any component in the app to react to real-time updates.
+*   [x] **Global State Management (Zustand):** Set up Zustand to create a global store for the `GameState` received from the server. This will allow any component in the app to react to real-time updates.
     *   The WebSocket service will update this global store upon receiving a `game_state_update` message.
 
 **Phase 2: Component Scaffolding (with shadcn/ui)**
-*   [ ] **Create Component Files:** Based on the `PLAN.md`, create the following presentational components in `src/components`. Utilize `shadcn/ui` components (e.g., Button, Input, Card) where appropriate.
+*   [x] **Create Component Files:** Based on the `PLAN.md`, create the following presentational components in `src/components`. Utilize `shadcn/ui` components (e.g., Button, Input, Card) where appropriate.
     *   `Header.tsx`: To display game status, round number, and the timer.
     *   `PlayerList.tsx`: To display the list of players and their scores.
     *   `QuestionDisplay.tsx`: To show the current question and its category/difficulty.

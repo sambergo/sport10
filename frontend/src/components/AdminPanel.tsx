@@ -28,7 +28,7 @@ export function AdminPanel() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <div className="flex space-x-4">
+        <div className="flex flex-col space-y-4">
           <Button onClick={handleStart} className="w-full">Start Game</Button>
           <Button onClick={handleReset} variant="destructive" className="w-full">Reset Game</Button>
         </div>

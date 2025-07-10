@@ -31,8 +31,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main>{renderView()}</main>
+    <div className="mobile-screen">
+      <main className="animate-fade-in">{renderView()}</main>
     </div>
   );
 }

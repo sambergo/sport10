@@ -1,6 +1,6 @@
 // src/store/gameStore.ts
 import { create } from 'zustand';
-import { GameState } from '@/common/types/game';
+import type { GameState } from '../../../common/types/game';
 
 interface GameStore {
   gameState: GameState;

@@ -21,12 +21,12 @@ This plan outlines the steps to build the React frontend for the Smart10 game, c
     *   `Scoreboard.tsx`: To show the main leaderboard.
 
 **Phase 3: Page Views & State-Driven Rendering**
-*   [ ] **Create Page Components:** Create higher-level components in a `src/pages` or `src/views` directory that compose the smaller components.
+*   [x] **Create Page Components:** Create higher-level components in a `src/pages` or `src/views` directory that compose the smaller components.
     *   `LobbyView.tsx`: Shown when `gameState.status === 'Waiting'`. Will include a form for the player to join and the `AdminPanel`.
     *   `GameView.tsx`: Shown when `gameState.status === 'Answering'`. Will include the `Header`, `QuestionDisplay`, and `AnswerOptions`.
     *   `ResultsView.tsx`: Shown when `gameState.status === 'Results'`. Will show the results of the round, highlighting correct answers and displaying `roundScore`.
     *   `FinishedView.tsx`: Shown when `gameState.status === 'Finished'`. Displays the final winner and scores.
-*   [ ] **Implement Conditional Rendering:** In `App.tsx`, read the `gameState.status` from the global store and render the appropriate page view (`LobbyView`, `GameView`, etc.).
+*   [x] **Implement Conditional Rendering:** In `App.tsx`, read the `gameState.status` from the global store and render the appropriate page view (`LobbyView`, `GameView`, etc.).
 
 **Phase 4: Interactivity & API Integration**
 *   [ ] **Implement Player Actions:**
@@ -37,8 +37,7 @@ This plan outlines the steps to build the React frontend for the Smart10 game, c
 *   [ ] **Implement Timer:** In the `Header` component, create a visual countdown timer that syncs with the `gameState.timer` value.
 
 **Phase 5: Styling & UX Refinements**
-*   [ ] **Apply Styling (with shadcn/ui & Tailwind CSS):** Style all components using Tailwind CSS and `shadcn/ui` to ensure the UI is clear, responsive, and visually appealing.
-*   [ ] **Visual Feedback:** Add visual cues for user actions, such as:
+*   [ ] **Apply Styling (with shadcn/ui & Tailwind CSS):`
     *   Disabling the "Submit" button after answers have been sent.
     *   Highlighting selected answers.
     *   Showing loading/connecting states.

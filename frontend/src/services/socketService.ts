@@ -1,9 +1,9 @@
 // src/services/socketService.ts
-import { GameState } from '@/common/types/game';
-import { WebSocketMessage } from '@/common/types/messages';
+import type { GameState } from '../../../common/types/game';
+import type { WebSocketMessage } from '../../../common/types/messages';
 import { useGameStore } from '../store/gameStore';
 
-const WEBSOCKET_URL = 'ws://localhost:3000';
+const WEBSOCKET_URL = 'ws://localhost:3001';
 
 let socket: WebSocket | null = null;
 

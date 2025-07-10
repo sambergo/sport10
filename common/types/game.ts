@@ -15,7 +15,8 @@ export interface Player {
   id: string;
   name: string;
   score: number;
-  isInactive: boolean;
+  roundStatus: 'in_round' | 'passed' | 'out';
+  lastAnswerCorrect: boolean | null;
   timeoutCount: number;
   // Data for the current round
   roundAnswers: number[]; // Will store indices of answers given by player
@@ -30,4 +31,5 @@ export interface GameState {
   currentQuestion: Question | null;
   currentRound: number;
   timer: number;
+  activePlayerId: string | null;
 }

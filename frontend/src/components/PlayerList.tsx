@@ -38,7 +38,12 @@ export function PlayerList() {
                   {getStatusLabel(player.roundStatus)}
                 </span>
               </span>
-              <span className="font-bold">{player.score} pts</span>
+              <span className="font-bold">
+                {player.score} pts
+                {player.roundScore > 0 && (
+                  <span className="text-green-600 ml-2">(+{player.roundScore})</span>
+                )}
+              </span>
             </li>
           ))}
         </ul>

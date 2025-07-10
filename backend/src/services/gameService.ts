@@ -121,22 +121,23 @@ export function handleSubmitAnswer(playerId: string, answerIndex: number): boole
     if (isCorrect) {
         player.roundScore += 1;
         player.roundAnswers.push(answerIndex);
-        // Turn does NOT advance, player can go again
         console.log(`Player ${player.name} answered correctly.`);
+
+        // Check if all correct answers have been found
+        const revealedAnswers = gameState.players.flatMap(p => p.roundAnswers);
+        const totalCorrectAnswers = question.options.filter(o => o.isCorrect).length;
+
+        if (revealedAnswers.length === totalCorrectAnswers) {
+            endRound();
+        } else {
+            // The turn stays with the player, just broadcast the updated state
+            broadcastGameState();
+        }
     } else {
         player.roundScore = 0; // Lose all points from the round
         player.roundStatus = 'out';
         console.log(`Player ${player.name} answered incorrectly and is out of the round.`);
-        advanceTurn();
-    }
-
-    // Also check if the round should end because all answers are found
-    const revealedAnswers = gameState.players.flatMap(p => p.roundAnswers);
-    const totalCorrectAnswers = question.options.filter(o => o.isCorrect).length;
-    if (revealedAnswers.length === totalCorrectAnswers) {
-        endRound();
-    } else {
-        broadcastGameState();
+        advanceTurn(); // This handles the broadcast and moves to the next player
     }
 
     return true;

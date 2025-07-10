@@ -17,17 +17,27 @@ export function AnswerOptions() {
   const isMyTurn = activePlayerId === myPlayerId;
   const isAnsweringPhase = status === 'Answering';
 
-  const revealedAnswers = players.flatMap(p => p.roundAnswers);
+  const revealedCorrectAnswers = players.flatMap(p => p.roundAnswers);
+  const revealedIncorrectAnswers = currentQuestion.revealedIncorrectAnswers || [];
 
   return (
     <div>
       <div className="grid grid-cols-2 gap-4">
         {currentQuestion.options.map((option, index) => {
-          const isRevealed = revealedAnswers.includes(index);
+          const isRevealedCorrect = revealedCorrectAnswers.includes(index);
+          const isRevealedIncorrect = revealedIncorrectAnswers.includes(index);
+          const isRevealed = isRevealedCorrect || isRevealedIncorrect;
+
+          const getVariant = () => {
+            if (isRevealedCorrect) return 'success';
+            if (isRevealedIncorrect) return 'destructive';
+            return 'outline';
+          };
+
           return (
             <Button
               key={index}
-              variant={isRevealed ? 'success' : 'outline'}
+              variant={getVariant()}
               onClick={() => handleSelectAnswer(index)}
               disabled={!isAnsweringPhase || !isMyTurn || isRevealed}
               className="h-full py-4"

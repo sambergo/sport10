@@ -3,12 +3,18 @@ export interface AnswerOption {
   isCorrect: boolean;
 }
 
-export interface Question {
+// Represents the static data for a question
+export interface QuestionTemplate {
   id: number;
   question: string;
   options: AnswerOption[];
   category: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
+}
+
+// Represents a question being played in a round
+export interface Question extends QuestionTemplate {
+  revealedIncorrectAnswers: number[];
 }
 
 export interface Player {

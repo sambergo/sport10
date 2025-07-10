@@ -1,6 +1,6 @@
-import { Question } from '@/common/types/game';
+import { QuestionTemplate } from '@/common/types/game';
 
-export const dummyQuestions: Question[] = [
+export const dummyQuestions: QuestionTemplate[] = [
   {
     id: 1,
     question: 'Which of the following are programming languages?',

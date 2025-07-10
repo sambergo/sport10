@@ -1,6 +1,6 @@
 // src/services/gameService.ts
 import { gameState, updateGameState, resetGame as resetGameState } from '../game';
-import { Player, GameStatus, Question } from '@/common/types/game';
+import { Player, GameStatus, Question, QuestionTemplate } from '@/common/types/game';
 import { broadcastGameState } from '../websocket';
 import { config } from '../config';
 import { dummyQuestions } from '../data/questions';
@@ -56,11 +56,17 @@ function endRound() {
 }
 
 function startNewRound() {
-    const question = selectNewQuestion();
-    if (!question) {
+    const questionTemplate = selectNewQuestion();
+    if (!questionTemplate) {
         endGame('No more questions!');
         return;
     }
+
+    // Add the dynamic state for the round to the question
+    const question: Question = {
+        ...questionTemplate,
+        revealedIncorrectAnswers: [],
+    };
 
     // Reset player round status and scores
     const resetPlayers = gameState.players.map(p => ({
@@ -122,19 +128,21 @@ export function handleSubmitAnswer(playerId: string, answerIndex: number): boole
         player.roundScore += 1;
         player.roundAnswers.push(answerIndex);
         console.log(`Player ${player.name} answered correctly.`);
-
-        const revealedAnswers = gameState.players.flatMap(p => p.roundAnswers);
-        const totalCorrectAnswers = question.options.filter(o => o.isCorrect).length;
-
-        if (revealedAnswers.length === totalCorrectAnswers) {
-            endRound();
-        } else {
-            advanceTurn();
-        }
     } else {
-        player.roundScore = 0; // Lose all points from the round
+        player.roundScore = 0;
         player.roundStatus = 'out';
+        question.revealedIncorrectAnswers.push(answerIndex);
         console.log(`Player ${player.name} answered incorrectly and is out of the round.`);
+    }
+
+    // --- Check for Round End Conditions ---
+    const revealedCorrectAnswers = gameState.players.flatMap(p => p.roundAnswers);
+    const totalRevealedAnswers = revealedCorrectAnswers.length + question.revealedIncorrectAnswers.length;
+    const allOptionsRevealed = totalRevealedAnswers === question.options.length;
+
+    if (allOptionsRevealed) {
+        endRound();
+    } else {
         advanceTurn();
     }
 
@@ -193,7 +201,7 @@ function endGame(reason: string) {
     broadcastGameState();
 }
 
-function selectNewQuestion(): Question | null {
+function selectNewQuestion(): QuestionTemplate | null {
     // For now, just pick a random one. A real implementation would avoid repeats.
     const questionIndex = Math.floor(Math.random() * dummyQuestions.length);
     return dummyQuestions[questionIndex];

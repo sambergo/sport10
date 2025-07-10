@@ -3,7 +3,7 @@
 This plan outlines the steps to build the React frontend for the Smart10 game, consuming the WebSocket API from the backend.
 
 **Phase 1: Project Setup & Core Services**
-*   [ ] **Define Types:** Create a `src/types` directory and define TypeScript interfaces for `GameState`, `Player`, `Question`, etc., mirroring the structures in `backend/API.md`.
+*   [ ] **Use Shared Types:** Import and use the shared TypeScript interfaces (`GameState`, `Player`, etc.) from the `@/common/types` directory. This avoids duplication and ensures consistency between the frontend and backend.
 *   [ ] **WebSocket Service:** Create a `src/services/socketService.ts` module. This service will be responsible for:
     *   Establishing and maintaining the WebSocket connection.
     *   Sending messages to the server.

@@ -3,7 +3,8 @@ import { gameState, updateGameState, resetGame as resetGameState } from '../game
 import { Player, GameStatus, Question, QuestionTemplate } from '@/common/types/game';
 import { broadcastGameState } from '../websocket';
 import { config } from '../config';
-import { dummyQuestions } from '../data/questions';
+// import { dummyQuestions } from '../data/questions'; // Removed: No longer needed
+import { getRandomQuestion } from '../database'; // New import
 import { v4 as uuidv4 } from 'uuid';
 
 let gameLoopTimeout: NodeJS.Timeout | null = null;
@@ -55,8 +56,8 @@ function endRound() {
     }
 }
 
-function startNewRound() {
-    const questionTemplate = selectNewQuestion();
+async function startNewRound() { // Made async to await DB fetch
+    const questionTemplate = await getRandomQuestion(); // Updated to fetch from DB
     if (!questionTemplate) {
         endGame('No more questions!');
         return;
@@ -91,25 +92,25 @@ function startNewRound() {
 // --- Player Actions ---
 
 export function handlePlayerJoin(name: string): Player | null {
-  if (gameState.status !== 'Waiting' || gameState.players.length >= config.playerLimit) {
-    return null;
-  }
+    if (gameState.status !== 'Waiting' || gameState.players.length >= config.playerLimit) {
+        return null;
+    }
 
-  const newPlayer: Player = {
-    id: uuidv4(),
-    name,
-    score: 0,
-    roundStatus: 'in_round',
-    lastAnswerCorrect: null,
-    timeoutCount: 0,
-    roundAnswers: [],
-    roundScore: 0,
-  };
+    const newPlayer: Player = {
+        id: uuidv4(),
+        name,
+        score: 0,
+        roundStatus: 'in_round',
+        lastAnswerCorrect: null,
+        timeoutCount: 0,
+        roundAnswers: [],
+        roundScore: 0,
+    };
 
-  updateGameState({ players: [...gameState.players, newPlayer] });
-  broadcastGameState();
-  console.log(`Player ${name} joined the game.`);
-  return newPlayer;
+    updateGameState({ players: [...gameState.players, newPlayer] });
+    broadcastGameState();
+    console.log(`Player ${name} joined the game.`);
+    return newPlayer;
 }
 
 export function handleSubmitAnswer(playerId: string, answerIndex: number): boolean {
@@ -167,24 +168,24 @@ export function handlePassTurn(playerId: string): boolean {
 // --- Admin Actions ---
 
 export function handleAdminStartGame(password: string): boolean {
-  if (password !== config.adminPassword) {
-    console.log('Admin action failed: Invalid password.');
-    return false;
-  }
-  if (gameState.status !== 'Waiting' || gameState.players.length < 2) {
-    console.log('Admin action failed: Game already in progress or not enough players.');
-    return false;
-  }
+    if (password !== config.adminPassword) {
+        console.log('Admin action failed: Invalid password.');
+        return false;
+    }
+    if (gameState.status !== 'Waiting' || gameState.players.length < 2) {
+        console.log('Admin action failed: Game already in progress or not enough players.');
+        return false;
+    }
 
-  startNewRound();
-  console.log('Admin started the game.');
-  return true;
+    startNewRound();
+    console.log('Admin started the game.');
+    return true;
 }
 
 export function handleAdminResetGame(password: string): boolean {
     if (password !== config.adminPassword) {
-      console.log('Admin action failed: Invalid password.');
-      return false;
+        console.log('Admin action failed: Invalid password.');
+        return false;
     }
     if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
     resetGameState();
@@ -201,8 +202,4 @@ function endGame(reason: string) {
     broadcastGameState();
 }
 
-function selectNewQuestion(): QuestionTemplate | null {
-    // For now, just pick a random one. A real implementation would avoid repeats.
-    const questionIndex = Math.floor(Math.random() * dummyQuestions.length);
-    return dummyQuestions[questionIndex];
-}
+// Removed selectNewQuestion: Now handled directly in startNewRound via getRandomQuestion

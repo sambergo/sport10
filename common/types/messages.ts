@@ -17,8 +17,10 @@ export interface AdminActionPayload {
 }
 
 export interface SubmitAnswerPayload {
-  answerIndices: number[];
+  answerIndex: number;
 }
+
+export interface PassTurnPayload {} // No payload needed
 
 // --- Server to Client Message Payloads ---
 
@@ -32,7 +34,8 @@ export type ClientMessageType =
   | 'player_join'
   | 'admin_start_game'
   | 'admin_reset_game'
-  | 'submit_answer';
+  | 'submit_answer'
+  | 'pass_turn';
 
 export type ServerMessageType =
   | 'game_state_update'

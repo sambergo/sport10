@@ -7,6 +7,7 @@ export let gameState: GameState = {
   currentQuestion: null,
   currentRound: 0,
   timer: 0,
+  activePlayerId: null,
 };
 
 // --- State Machine Functions ---
@@ -21,6 +22,7 @@ export function resetGame(): void {
     currentQuestion: null,
     currentRound: 0,
     timer: 0,
+    activePlayerId: null,
   };
   console.log('Game has been reset');
 }

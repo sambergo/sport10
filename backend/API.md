@@ -1,161 +1,135 @@
-# Smart10 Backend WebSocket API
+# Smart 10 - WebSocket API
 
-This document outlines how to communicate with the Smart10 game server.
+This document outlines the WebSocket communication protocol for the Smart 10 game.
 
-## Connecting
+## Connection
 
-Connect to the WebSocket server at the following endpoint:
+Clients connect to the server via a WebSocket connection. Upon successful connection, the server immediately sends a `game_state_update` message.
 
-```
-ws://localhost:3000
-```
+## Message Format
 
-## Communication Protocol
-
-All communication is done via JSON objects. Every message, both from the client and the server, follows this structure:
+All messages exchanged between client and server are JSON objects with two properties:
+- `type`: A string identifying the message type (e.g., `'player_join'`).
+- `payload`: An object containing the data for that message type.
 
 ```json
 {
-  "type": "message_type_string",
-  "payload": { ... }
+  "type": "message_type",
+  "payload": {
+    "key": "value"
+  }
 }
 ```
 
 ---
 
-## Server-to-Client Messages
+## Client-to-Server Messages (Actions)
 
-These are the messages the server will send to you.
+### `player_join`
+- **Direction**: Client -> Server
+- **Description**: A player requests to join the game.
+- **Payload**:
+  ```json
+  {
+    "name": "PlayerName"
+  }
+  ```
+
+### `submit_answer`
+- **Direction**: Client -> Server
+- **Description**: The active player submits a single answer for the current question.
+- **Payload**:
+  ```json
+  {
+    "answerIndex": 2
+  }
+  ```
+
+### `pass_turn`
+- **Direction**: Client -> Server
+- **Description**: The active player chooses to pass their turn for the current round.
+- **Payload**: `{}` (Empty)
+
+### `admin_start_game`
+- **Direction**: Client -> Server
+- **Description**: An admin requests to start the game. Requires the correct password.
+- **Payload**:
+  ```json
+  {
+    "password": "your_admin_password"
+  }
+  ```
+
+### `admin_reset_game`
+- **Direction**: Client -> Server
+- **Description**: An admin requests to reset the entire game state. Requires the correct password.
+- **Payload**:
+  ```json
+  {
+    "password": "your_admin_password"
+  }
+  ```
+
+---
+
+## Server-to-Client Messages (Events)
 
 ### `game_state_update`
+- **Direction**: Server -> Client
+- **Description**: The primary message for synchronizing the game state. Sent whenever any change occurs (player joins, round starts, scores update, etc.).
+- **Payload**: The entire `GameState` object.
 
-This is the primary message from the server. It is sent whenever the game's state changes (e.g., a player joins, a round starts, scores are updated). Your client should listen for this message and re-render its UI based on the new state provided in the payload.
-
-**Payload:** The entire `GameState` object.
-
-```ts
-// The structure of the GameState payload
+#### `GameState` Object
+```typescript
 interface GameState {
   status: 'Waiting' | 'Answering' | 'Results' | 'Finished';
-  players: {
-    id: string;
-    name: string;
-    score: number;
-    isInactive: boolean;
-    // In the 'Results' phase, this shows the score gained in the last round.
-    roundScore: number;
-  }[];
-  currentQuestion: {
-    id: number;
-    question: string;
-    // IMPORTANT: For clients, the `isCorrect` property will always be `false`
-    // during the 'Answering' phase to hide the answers.
-    // The correct answers are revealed during the 'Results' phase.
-    options: {
-      text: string;
-      isCorrect: boolean;
-    }[];
-    category: string;
-    difficulty: 'Easy' | 'Medium' | 'Hard';
-  } | null;
+  players: Player[];
+  currentQuestion: Question | null;
   currentRound: number;
-  timer: number; // Countdown timer for the 'Answering' phase
+  timer: number; // Note: May be deprecated or repurposed in turn-based model
+  activePlayerId: string | null; // ID of the player whose turn it is
+}
+```
+
+#### `Player` Object
+```typescript
+interface Player {
+  id: string;
+  name: string;
+  score: number;
+  roundStatus: 'in_round' | 'passed' | 'out'; // Player's status in the current round
+  lastAnswerCorrect: boolean | null; // Feedback on the last submitted answer
+  timeoutCount: number;
+  roundAnswers: number[]; // Indices of correct answers given this round
+  roundScore: number;
+}
+```
+
+#### `Question` Object
+```typescript
+interface Question {
+  id: number;
+  question: string;
+  options: AnswerOption[];
+  category: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+}
+```
+
+#### `AnswerOption` Object
+```typescript
+interface AnswerOption {
+  text: string;
+  isCorrect: boolean; // This is hidden from clients during the 'Answering' phase
 }
 ```
 
 ### `error`
-
-Sent when the client sends an invalid message or performs an invalid action.
-
-**Payload:**
-
-```json
-{
-  "message": "A description of what went wrong."
-}
-```
-
----
-
-## Client-to-Server Messages
-
-These are the messages you can send to the server.
-
-### `player_join`
-
-Used to join the game before it has started.
-
-**Payload:**
-
-```json
-{
-  "type": "player_join",
-  "payload": {
-    "name": "YourPlayerName"
+- **Direction**: Server -> Client
+- **Description**: Sent when a client action results in an error.
+- **Payload**:
+  ```json
+  {
+    "message": "A descriptive error message."
   }
-}
-```
-
-### `admin_start_game`
-
-Starts the game. Requires the admin password. Can only be called when the game `status` is `Waiting` and there are at least 2 players.
-
-**Payload:**
-
-```json
-{
-  "type": "admin_start_game",
-  "payload": {
-    "password": "smart10-password"
-  }
-}
-```
-
-### `admin_reset_game`
-
-Resets the entire game state back to `Waiting`. Requires the admin password.
-
-**Payload:**
-
-```json
-{
-  "type": "admin_reset_game",
-  "payload": {
-    "password": "smart10-password"
-  }
-}
-```
-
-### `submit_answer`
-
-Submits the player's answers for the current round. Can only be sent when the game `status` is `Answering`.
-
-**Payload:**
-
-```json
-{
-  "type": "submit_answer",
-  "payload": {
-    "answerIndices": [1, 4, 8] // Array of indices of the selected options
-  }
-}
-```
-
-## Typical Game Flow
-
-1.  **Connect:** Client establishes a WebSocket connection.
-2.  **Receive Initial State:** Server immediately sends a `game_state_update` with the current game state (likely `status: 'Waiting'`).
-3.  **Join Game:** Client sends a `player_join` message.
-4.  **Wait for Start:** All clients receive a new `game_state_update` showing the new player in the list. Players wait until an admin starts the game.
-5.  **Game Starts:** An admin sends `admin_start_game`. The server broadcasts a `game_state_update` to all clients:
-    *   `status` is now `'Answering'`.
-    *   `currentQuestion` is populated.
-    *   `timer` is set.
-6.  **Submit Answers:** During the `'Answering'` phase, each client sends a `submit_answer` message.
-7.  **Round Ends:** When the timer expires, the server calculates scores and sends a `game_state_update`:
-    *   `status` is now `'Results'`.
-    *   The `isCorrect` property on the `currentQuestion` options is now correctly populated, revealing the answers.
-    *   Each player's `roundScore` is updated.
-    *   Each player's total `score` is updated.
-8.  **Next Round:** After a few seconds, the server automatically starts the next round by sending a new `game_state_update` with `status: 'Answering'` and a new question.
-9.  **Game Finishes:** The loop continues until a player's score reaches the win condition. The server sends a final `game_state_update` with `status: 'Finished'`.
+  ```

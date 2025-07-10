@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { Server } from 'http';
 import { gameState } from './game';
 import { WebSocketMessage, PlayerJoinPayload, AdminActionPayload, SubmitAnswerPayload } from '@/common/types/messages';
-import { handlePlayerJoin, handleAdminStartGame, handleAdminResetGame, handleSubmitAnswer } from './services/gameService';
+import { handlePlayerJoin, handleAdminStartGame, handleAdminResetGame, handleSubmitAnswer, handlePassTurn } from './services/gameService';
 
 // Extend the WebSocket type to hold our player ID
 interface PlayerWebSocket extends WebSocket {
@@ -49,6 +49,13 @@ export function broadcastGameState(): void {
 function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): void {
   console.log(`Received message of type: ${message.type}`);
 
+  // Ensure player is associated for player-specific actions
+  const playerId = ws.playerId;
+  if (!playerId && (message.type === 'submit_answer' || message.type === 'pass_turn')) {
+    ws.send(JSON.stringify({ type: 'error', payload: { message: 'You have not joined the game.' } }));
+    return;
+  }
+
   switch (message.type) {
     case 'player_join':
       const { name } = message.payload as PlayerJoinPayload;
@@ -75,13 +82,12 @@ function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): voi
         break;
 
     case 'submit_answer':
-      if (!ws.playerId) {
-        ws.send(JSON.stringify({ type: 'error', payload: { message: 'You have not joined the game.' } }));
-        return;
-      }
-      const { answerIndices } = message.payload as SubmitAnswerPayload;
-      handleSubmitAnswer(ws.playerId, answerIndices);
-      // No confirmation needed, client will get a full state update at round end
+      const { answerIndex } = message.payload as SubmitAnswerPayload;
+      handleSubmitAnswer(playerId!, answerIndex);
+      break;
+
+    case 'pass_turn':
+      handlePassTurn(playerId!);
       break;
 
     default:

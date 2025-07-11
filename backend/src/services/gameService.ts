@@ -8,6 +8,71 @@ import { getRandomQuestion } from '../database'; // New import
 import { v4 as uuidv4 } from 'uuid';
 
 let gameLoopTimeout: NodeJS.Timeout | null = null;
+let turnTimer: NodeJS.Timeout | null = null;
+let timerInterval: NodeJS.Timeout | null = null;
+
+// --- Timer Management ---
+
+function startTurnTimer() {
+    clearTurnTimer();
+    
+    // Set timer to config value
+    updateGameState({ timer: config.timeLimitSeconds });
+    broadcastGameState();
+    
+    // Start countdown interval
+    timerInterval = setInterval(() => {
+        const newTimer = gameState.timer - 1;
+        updateGameState({ timer: newTimer });
+        broadcastGameState();
+        
+        if (newTimer <= 0) {
+            handleTimeExpired();
+        }
+    }, 1000);
+    
+    // Set timeout for when time expires
+    turnTimer = setTimeout(() => {
+        handleTimeExpired();
+    }, config.timeLimitSeconds * 1000);
+}
+
+function clearTurnTimer() {
+    if (turnTimer) {
+        clearTimeout(turnTimer);
+        turnTimer = null;
+    }
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function handleTimeExpired() {
+    clearTurnTimer();
+    
+    if (gameState.status !== 'Answering' || !gameState.activePlayerId) {
+        return;
+    }
+    
+    const player = gameState.players.find(p => p.id === gameState.activePlayerId);
+    if (!player) return;
+    
+    // Increment timeout count
+    player.timeoutCount++;
+    console.log(`Player ${player.name} timed out. Timeout count: ${player.timeoutCount}`);
+    
+    // If player has exceeded inactive timeout limit, mark them as out
+    if (player.timeoutCount >= config.inactiveTimeout) {
+        player.roundStatus = 'out';
+        console.log(`Player ${player.name} marked as out due to inactivity.`);
+    } else {
+        player.roundStatus = 'passed';
+        console.log(`Player ${player.name} passed due to timeout.`);
+    }
+    
+    advanceTurn();
+}
 
 // --- Turn & Round Management ---
 
@@ -26,6 +91,7 @@ function advanceTurn() {
         endRound();
     } else {
         updateGameState({ activePlayerId: players[nextPlayerIndex].id });
+        startTurnTimer();
         broadcastGameState();
     }
 }
@@ -33,6 +99,7 @@ function advanceTurn() {
 function endRound() {
     if (gameState.status !== 'Answering') return;
 
+    clearTurnTimer();
     console.log(`Round ${gameState.currentRound} ended. Calculating scores.`);
     const { players } = gameState;
 
@@ -95,6 +162,9 @@ async function startNewRound() { // Made async to await DB fetch
         activePlayerId: resetPlayers[0]?.id || null, // Start with the first player
     });
 
+    if (resetPlayers[0]) {
+        startTurnTimer();
+    }
     broadcastGameState();
 }
 
@@ -148,6 +218,8 @@ export function handleSubmitAnswer(playerId: string, answerIndex: number): boole
     const question = gameState.currentQuestion;
     if (!player || !question) return false;
 
+    clearTurnTimer();
+
     const isCorrect = question.options[answerIndex]?.isCorrect === true;
     player.lastAnswerCorrect = isCorrect;
 
@@ -183,6 +255,8 @@ export function handlePassTurn(playerId: string): boolean {
 
     const player = gameState.players.find(p => p.id === playerId);
     if (!player) return false;
+
+    clearTurnTimer();
 
     player.roundStatus = 'passed';
     console.log(`Player ${player.name} passed their turn.`);
@@ -222,6 +296,7 @@ export function handleAdminResetGame(password: string): boolean {
         return false;
     }
     if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
+    clearTurnTimer();
     resetGameState();
     broadcastGameState();
     return true;
@@ -232,6 +307,7 @@ export function handleAdminResetGame(password: string): boolean {
 function endGame(reason: string) {
     console.log(`Game ended: ${reason}`);
     if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
+    clearTurnTimer();
     updateGameState({ status: 'Finished', activePlayerId: null });
     broadcastGameState();
     

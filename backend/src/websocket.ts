@@ -4,9 +4,10 @@ import { gameState } from './game';
 import { WebSocketMessage, PlayerJoinPayload, AdminActionPayload, SubmitAnswerPayload } from '@/common/types/messages';
 import { handlePlayerJoin, handleAdminStartGame, handleAdminResetGame, handleSubmitAnswer, handlePassTurn } from './services/gameService';
 
-// Extend the WebSocket type to hold our player ID
+// Extend the WebSocket type to hold our player info
 interface PlayerWebSocket extends WebSocket {
   playerId?: string;
+  playerName?: string;
 }
 
 let wss: WebSocket.Server;
@@ -46,6 +47,29 @@ export function broadcastGameState(): void {
   console.log('Broadcasted game state to all clients.');
 }
 
+export function broadcastPlayerUpdates(newPlayers: any[]): void {
+  if (!wss) return;
+  
+  wss.clients.forEach((client: PlayerWebSocket) => {
+    if (client.readyState === WebSocket.OPEN && client.playerName) {
+      // Find the new player object that matches this client's player name
+      const matchingNewPlayer = newPlayers.find(p => p.name === client.playerName);
+      
+      if (matchingNewPlayer) {
+        const oldPlayerId = client.playerId;
+        // Update the WebSocket's player ID association
+        client.playerId = matchingNewPlayer.id;
+        // Send the updated player info to this client
+        client.send(JSON.stringify({ 
+          type: 'player_joined', 
+          payload: matchingNewPlayer 
+        }));
+        console.log(`Updated client connection: ${matchingNewPlayer.name} from ${oldPlayerId} to ${matchingNewPlayer.id}`);
+      }
+    }
+  });
+}
+
 function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): void {
   console.log(`Received message of type: ${message.type}`);
 
@@ -62,6 +86,7 @@ function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): voi
       const player = handlePlayerJoin(name);
       if (player) {
         ws.playerId = player.id; // Associate player ID with this connection
+        ws.playerName = player.name; // Also store the player name
         // Send a confirmation back to the joining player with their details
         ws.send(JSON.stringify({ type: 'player_joined', payload: player }));
       } else {

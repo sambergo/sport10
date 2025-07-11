@@ -1,7 +1,6 @@
 // src/views/FinishedView.tsx
 import { Scoreboard } from '@/components/Scoreboard';
 import { useGameStore } from '@/store/gameStore';
-import { AdminPanel } from '@/components/AdminPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { socketService } from '@/services/socketService';
@@ -10,9 +9,9 @@ export function FinishedView() {
   const { players } = useGameStore((state: any) => state.gameState);
   const playerId = useGameStore((state) => state.playerId);
   const winner = players.sort((a: any, b: any) => b.score - a.score)[0];
-  
+
   const currentPlayer = players.find((p: any) => p.id === playerId);
-  
+
   const handleAutoJoinNext = () => {
     if (currentPlayer?.name) {
       socketService.joinGame(currentPlayer.name);
@@ -33,7 +32,7 @@ export function FinishedView() {
           )}
           <Scoreboard />
           <div className="mt-6">
-            <Button 
+            <Button
               onClick={handleAutoJoinNext}
               disabled={!currentPlayer?.name}
               className="w-full"

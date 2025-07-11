@@ -15,6 +15,7 @@ export interface QuestionTemplate {
 // Represents a question being played in a round
 export interface Question extends QuestionTemplate {
   revealedIncorrectAnswers: number[];
+  originalToShuffledMapping?: number[]; // Maps original option indices to shuffled indices
 }
 
 export interface Player {

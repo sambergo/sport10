@@ -2,7 +2,7 @@
 import { useGameStore } from '@/store/gameStore';
 
 export function GameTopBar() {
-  const { currentQuestion, activePlayerId, players, currentRound, questions, timer } = useGameStore((state: any) => state.gameState);
+  const { currentQuestion, activePlayerId, players, currentRound, timer } = useGameStore((state: any) => state.gameState);
   const myPlayerId = useGameStore((state: any) => state.playerId);
 
   const isMyTurn = activePlayerId === myPlayerId;

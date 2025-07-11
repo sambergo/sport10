@@ -7,6 +7,26 @@ import { config } from '../config';
 import { getRandomQuestion } from '../database'; // New import
 import { v4 as uuidv4 } from 'uuid';
 
+// Fisher-Yates shuffle algorithm to randomize array order
+function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// Create mapping from original indices to shuffled indices
+function createIndexMapping(originalLength: number, shuffledArray: any[], originalArray: any[]): number[] {
+    const mapping: number[] = [];
+    for (let i = 0; i < shuffledArray.length; i++) {
+        const originalIndex = originalArray.findIndex(item => item === shuffledArray[i]);
+        mapping[originalIndex] = i;
+    }
+    return mapping;
+}
+
 let gameLoopTimeout: NodeJS.Timeout | null = null;
 let turnTimer: NodeJS.Timeout | null = null;
 let timerInterval: NodeJS.Timeout | null = null;
@@ -142,10 +162,19 @@ async function startNewRound() { // Made async to await DB fetch
         return;
     }
 
+    // Shuffle the answer options
+    const originalOptions = questionTemplate.options;
+    const shuffledOptions = shuffleArray(originalOptions);
+    
+    // Create mapping from original indices to shuffled indices for answer validation
+    const indexMapping = createIndexMapping(originalOptions.length, shuffledOptions, originalOptions);
+
     // Add the dynamic state for the round to the question
     const question: Question = {
         ...questionTemplate,
+        options: shuffledOptions,
         revealedIncorrectAnswers: [],
+        originalToShuffledMapping: indexMapping,
     };
 
     // Reset player round status and scores

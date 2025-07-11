@@ -6,5 +6,5 @@ export const config = {
   timeLimitSeconds: 45,
   playerLimit: 8,
   inactiveTimeout: 2,
-  maxRounds: 2,
+  maxRounds: 10,
 };

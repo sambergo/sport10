@@ -10,8 +10,9 @@ import { useGameStore } from '@/store/gameStore';
 
 export function LobbyView() {
   const [playerName, setPlayerName] = useState('');
-  const { players } = useGameStore((state: any) => state.gameState);
-  const myPlayer = players.find((p: any) => p.name === playerName && p.id); // A simple way to check if we have joined
+  const { players, status } = useGameStore((state: any) => state.gameState);
+  const { playerId } = useGameStore((state) => state);
+  const myPlayer = players.find((p: any) => p.id === playerId);
 
   const handleJoinGame = () => {
     if (playerName.trim()) {
@@ -19,9 +20,16 @@ export function LobbyView() {
     }
   };
 
+  const getTitle = () => {
+    if (status === 'Waiting') {
+      return 'Waiting for Game to Start';
+    }
+    return myPlayer ? 'You can join the current game!' : 'Game in Progress - Join Now!';
+  };
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-3xl font-bold text-center mb-6">Waiting for Game to Start</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">{getTitle()}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <Card>
@@ -36,7 +44,7 @@ export function LobbyView() {
                 disabled={!!myPlayer}
               />
               <Button onClick={handleJoinGame} className="w-full" disabled={!!myPlayer || !playerName.trim()}>
-                {myPlayer ? 'Joined!' : 'Join Game'}
+                {myPlayer ? 'Joined!' : status === 'Waiting' ? 'Join Game' : 'Join Current Game'}
               </Button>
             </CardContent>
           </Card>

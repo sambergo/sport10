@@ -92,7 +92,17 @@ async function startNewRound() { // Made async to await DB fetch
 // --- Player Actions ---
 
 export function handlePlayerJoin(name: string): Player | null {
-    if (gameState.status !== 'Waiting' || gameState.players.length >= config.playerLimit) {
+    console.log(`Attempting to join: ${name}, current players: ${gameState.players.length}, limit: ${config.playerLimit}, status: ${gameState.status}`);
+    
+    if (gameState.players.length >= config.playerLimit) {
+        console.log('Join failed: player limit reached');
+        return null;
+    }
+
+    // Check for duplicate names
+    const existingPlayer = gameState.players.find(p => p.name === name);
+    if (existingPlayer) {
+        console.log(`Join failed: player with name ${name} already exists`);
         return null;
     }
 
@@ -100,7 +110,7 @@ export function handlePlayerJoin(name: string): Player | null {
         id: uuidv4(),
         name,
         score: 0,
-        roundStatus: 'in_round',
+        roundStatus: gameState.status === 'Answering' ? 'in_round' : 'in_round',
         lastAnswerCorrect: null,
         timeoutCount: 0,
         roundAnswers: [],
@@ -109,7 +119,14 @@ export function handlePlayerJoin(name: string): Player | null {
 
     updateGameState({ players: [...gameState.players, newPlayer] });
     broadcastGameState();
-    console.log(`Player ${name} joined the game.`);
+    console.log(`Player ${name} joined the game successfully. New player count: ${gameState.players.length}`);
+    
+    // Auto-start game if this is the first or second player and game is waiting
+    if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
+        console.log('Auto-starting game...');
+        setTimeout(() => autoStartGame(), 2000); // 2 second delay for more players to join
+    }
+    
     return newPlayer;
 }
 
@@ -167,12 +184,20 @@ export function handlePassTurn(playerId: string): boolean {
 
 // --- Admin Actions ---
 
+// Auto-start game functionality
+function autoStartGame() {
+    if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
+        startNewRound();
+        console.log('Game auto-started.');
+    }
+}
+
 export function handleAdminStartGame(password: string): boolean {
     if (password !== config.adminPassword) {
         console.log('Admin action failed: Invalid password.');
         return false;
     }
-    if (gameState.status !== 'Waiting' || gameState.players.length < 2) {
+    if (gameState.status !== 'Waiting' || gameState.players.length < 1) {
         console.log('Admin action failed: Game already in progress or not enough players.');
         return false;
     }
@@ -200,6 +225,17 @@ function endGame(reason: string) {
     if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
     updateGameState({ status: 'Finished', activePlayerId: null });
     broadcastGameState();
+    
+    // Auto-restart after 1 minute
+    gameLoopTimeout = setTimeout(() => {
+        console.log('Auto-restarting game after 1 minute...');
+        resetGameState();
+        broadcastGameState();
+        // If there are players, auto-start immediately
+        if (gameState.players.length >= 1) {
+            setTimeout(() => autoStartGame(), 2000);
+        }
+    }, 60000); // 60 seconds = 1 minute
 }
 
 // Removed selectNewQuestion: Now handled directly in startNewRound via getRandomQuestion

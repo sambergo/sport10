@@ -7,7 +7,9 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-questions": "python3 ../scripts/generate_questions.py",
+    "generate-batch": "python3 ../scripts/generate_batch_questions.py"
   },
   "keywords": [],
   "author": "",

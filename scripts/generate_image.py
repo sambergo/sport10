@@ -6,6 +6,7 @@ from io import BytesIO
 from google import genai
 from PIL import Image
 
+
 def generate_and_save_image(prompt):
     """
     Generates an image based on a prompt and saves it to a file.
@@ -18,7 +19,7 @@ def generate_and_save_image(prompt):
             prompt=prompt,
             config=dict(
                 number_of_images=1,
-                output_mime_type="image/jpeg",
+                output_mime_type="image/png",
                 person_generation="ALLOW_ADULT",
                 aspect_ratio="1:1",
             ),
@@ -38,7 +39,7 @@ def generate_and_save_image(prompt):
 
         # Generate a unique filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}.jpeg"
+        filename = f"{timestamp}.png"
         filepath = os.path.join(images_dir, filename)
 
         # Save the image
@@ -50,12 +51,15 @@ def generate_and_save_image(prompt):
     except Exception as e:
         print(f"An error occurred: {e}")
         if "API_KEY" in str(e):
-            print("Please make sure your GEMINI_API_KEY environment variable is set correctly.")
+            print(
+                "Please make sure your GEMINI_API_KEY environment variable is set correctly."
+            )
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python generate_image.py \"<your_prompt>\"")
+        print('Usage: python generate_image.py "<your_prompt>"')
         sys.exit(1)
-    
+
     input_prompt = sys.argv[1]
     generate_and_save_image(input_prompt)

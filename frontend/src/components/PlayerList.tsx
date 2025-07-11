@@ -38,8 +38,10 @@ export function PlayerList() {
               className={`flex-shrink-0 flex flex-col items-center gap-1 p-2 rounded-lg transition-all duration-200 min-w-[60px] ${
                 isActivePlayer 
                   ? 'bg-gradient-to-b from-[var(--color-green-primary)]/20 to-[var(--color-blue-primary)]/20 border border-[var(--color-green-primary)]/30' 
-                  : 'bg-white/5 border border-white/10'
-              } ${isMe ? 'ring-1 ring-[var(--color-blue-primary)]/50' : ''}`}
+                  : isMe
+                    ? 'bg-gradient-to-b from-blue-500/20 to-purple-500/20 border border-blue-400/50 shadow-md'
+                    : 'bg-white/5 border border-white/10'
+              } ${isMe ? 'ring-2 ring-blue-400/30' : ''}`}
             >
               {/* Rank */}
               <div className="flex-shrink-0">
@@ -50,7 +52,9 @@ export function PlayerList() {
                 ) : index === 2 ? (
                   <span className="text-sm">🥉</span>
                 ) : (
-                  <span className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold">
+                  <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold ${
+                    isMe ? 'bg-blue-400/30 text-blue-200' : 'bg-white/20'
+                  }`}>
                     {index + 1}
                   </span>
                 )}
@@ -61,7 +65,9 @@ export function PlayerList() {
                 <img
                   src={avatarSrc}
                   alt={`${player.name}'s avatar`}
-                  className="w-6 h-6 rounded-full border border-white/20"
+                  className={`w-6 h-6 rounded-full border transition-all duration-200 ${
+                    isMe ? 'border-blue-400 shadow-sm' : 'border-white/20'
+                  }`}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/avatars/1.jpeg';
                   }}
@@ -70,11 +76,15 @@ export function PlayerList() {
 
               {/* Player Info */}
               <div className="text-center min-w-0">
-                <div className="text-xs text-[var(--color-text-primary)] font-medium truncate max-w-[50px]">
+                <div className={`text-xs font-medium truncate max-w-[50px] ${
+                  isMe ? 'text-blue-200' : 'text-[var(--color-text-primary)]'
+                }`}>
                   {player.name}
-                  {isMe && <span className="text-[var(--color-blue-primary)]">*</span>}
+                  {isMe && <span className="text-blue-300">*</span>}
                 </div>
-                <div className="text-xs font-bold text-[var(--color-text-primary)]">
+                <div className={`text-xs font-bold ${
+                  isMe ? 'text-blue-200' : 'text-[var(--color-text-primary)]'
+                }`}>
                   {player.score}
                 </div>
                 {isActivePlayer && (

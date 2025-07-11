@@ -117,6 +117,15 @@ function endRound() {
     if (winner) {
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
         gameLoopTimeout = setTimeout(() => endGame(`${winner.name} wins!`), 5000);
+    } else if (gameState.currentRound >= config.maxRounds) {
+        // Game ends when max rounds reached
+        const topScore = Math.max(...updatedPlayers.map(p => p.score));
+        const winners = updatedPlayers.filter(p => p.score === topScore);
+        const winnerMessage = winners.length === 1 
+            ? `${winners[0].name} wins!` 
+            : `Tie between ${winners.map(p => p.name).join(', ')}!`;
+        if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
+        gameLoopTimeout = setTimeout(() => endGame(`Max rounds reached! ${winnerMessage}`), 5000);
     } else {
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
         gameLoopTimeout = setTimeout(startNewRound, 5000); // 5s for results before next round

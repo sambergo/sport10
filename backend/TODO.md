@@ -28,11 +28,11 @@ Here is a proposed to-do list for building the Smart10 game backend:
 
 **Phase 4: Database Integration with SQLite**
 
-- [ ] **Setup SQLite:** Add and configure `sqlite3` and `sqlite` packages.
-- [ ] **Database Service:** Create a `database.ts` module to handle all database connections and queries.
-- [ ] **Define Schema:** Create the necessary tables: `questions`, `categories`, etc.
-- [ ] **Seed Database:** Write a script to populate the database with initial question data.
-- [ ] **Integrate Questions:** Modify the game logic to fetch random questions from the database instead of the mock file.
+- [x] **Setup SQLite:** Add and configure `sqlite3` and `sqlite` packages.
+- [x] **Database Service:** Create a `database.ts` module to handle all database connections and queries.
+- [x] **Define Schema:** Create the necessary tables: `questions`, `categories`, etc.
+- [x] **Seed Database:** Write a script to populate the database with initial question data.
+- [x] **Integrate Questions:** Modify the game logic to fetch random questions from the database instead of the mock file.
 
 **Phase 5: Refinement & Edge Cases**
 

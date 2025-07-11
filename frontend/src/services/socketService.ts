@@ -3,7 +3,9 @@ import type { GameState, Player } from '../../../common/types/game';
 import type { WebSocketMessage } from '../../../common/types/messages';
 import { useGameStore } from '../store/gameStore';
 
-const WEBSOCKET_URL = 'ws://localhost:3001';
+const WEBSOCKET_URL = process.env.NODE_ENV === "development"
+  ? 'ws://localhost:3001' :
+  window.location.origin.replace(/^http/, "ws");
 
 let socket: WebSocket | null = null;
 let playerId: string | null = null; // Store player ID locally in the service

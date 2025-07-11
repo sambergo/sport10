@@ -36,19 +36,27 @@ export function GameActions() {
       <div className="flex items-center justify-between max-w-full mx-auto px-2">
         {/* Compact Scoreboard - Top 3 Players */}
         <div className="flex items-center gap-2 flex-1">
-          {topPlayers.slice(0, 3).map((player, index) => (
-            <div key={player.id} className="flex items-center gap-1">
-              <img 
-                src={getPlayerAvatar(player.id, index)}
-                alt={player.name}
-                className="w-6 h-6 rounded-full border border-white/20"
-              />
-              <span className="text-xs font-medium text-[var(--color-text-primary)]">
-                {player.score}
-              </span>
-              {index < 2 && <span className="text-[var(--color-text-secondary)]">•</span>}
-            </div>
-          ))}
+          {topPlayers.slice(0, 3).map((player, index) => {
+            const isMe = player.id === myPlayerId;
+            return (
+              <div key={player.id} className="flex items-center gap-1">
+                <img 
+                  src={getPlayerAvatar(player.id, index)}
+                  alt={player.name}
+                  className={`w-6 h-6 rounded-full border transition-all duration-200 ${
+                    isMe ? 'border-blue-400 shadow-sm ring-1 ring-blue-400/30' : 'border-white/20'
+                  }`}
+                />
+                <span className={`text-xs font-medium ${
+                  isMe ? 'text-blue-200' : 'text-[var(--color-text-primary)]'
+                }`}>
+                  {player.score}
+                  {isMe && <span className="text-blue-300 ml-0.5">*</span>}
+                </span>
+                {index < 2 && <span className="text-[var(--color-text-secondary)]">•</span>}
+              </div>
+            );
+          })}
         </div>
 
         {/* Main Action Button */}
@@ -71,14 +79,14 @@ export function GameActions() {
         <div className="flex items-center gap-1 flex-1 justify-end">
           {myRank > 3 && myPlayer && (
             <>
-              <span className="text-xs text-[var(--color-text-secondary)]">#{myRank}</span>
+              <span className="text-xs text-blue-300">#{myRank}</span>
               <img 
                 src={getPlayerAvatar(myPlayer.id, myRank - 1)}
                 alt="You"
-                className="w-6 h-6 rounded-full border border-white/20"
+                className="w-6 h-6 rounded-full border border-blue-400 shadow-sm ring-1 ring-blue-400/30"
               />
-              <span className="text-xs font-medium text-[var(--color-text-primary)]">
-                {myPlayer.score}
+              <span className="text-xs font-medium text-blue-200">
+                {myPlayer.score}*
               </span>
             </>
           )}

@@ -6,11 +6,9 @@ export function Scoreboard() {
   const players = useGameStore((state: any) => state.gameState.players);
   const currentPlayerId = useGameStore((state: any) => state.playerId);
 
-  // Auto-assign avatars based on player ID or index
-  const getPlayerAvatar = (playerId: string, index: number) => {
-    // Use a simple hash of the player ID to consistently assign avatars
-    const avatarIndex = ((playerId.charCodeAt(0) + index) % 21) + 1;
-    return `/avatars/${avatarIndex}.jpeg`;
+  // Get player avatar from their profile data
+  const getPlayerAvatar = (player: any) => {
+    return `/avatars/${player.avatar || 1}.jpeg`;
   };
 
   // Sort players by score for the leaderboard
@@ -24,7 +22,7 @@ export function Scoreboard() {
       <CardContent>
         <ul className="space-y-2">
           {sortedPlayers.map((player, index) => {
-            const avatarSrc = getPlayerAvatar(player.id, index);
+            const avatarSrc = getPlayerAvatar(player);
             const isCurrentUser = player.id === currentPlayerId;
             return (
               <li 

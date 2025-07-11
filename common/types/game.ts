@@ -20,6 +20,7 @@ export interface Question extends QuestionTemplate {
 export interface Player {
   id: string;
   name: string;
+  avatar: number;
   score: number;
   roundStatus: 'in_round' | 'passed' | 'out';
   lastAnswerCorrect: boolean | null;

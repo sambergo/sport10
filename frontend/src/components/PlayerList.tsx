@@ -5,11 +5,9 @@ export function PlayerList() {
   const { players, activePlayerId } = useGameStore((state: any) => state.gameState);
   const myPlayerId = useGameStore((state: any) => state.playerId);
 
-  // Auto-assign avatars based on player ID or index
-  const getPlayerAvatar = (playerId: string, index: number) => {
-    // Use a simple hash of the player ID to consistently assign avatars
-    const avatarIndex = ((playerId.charCodeAt(0) + index) % 21) + 1;
-    return `/avatars/${avatarIndex}.jpeg`;
+  // Get player avatar from their profile data
+  const getPlayerAvatar = (player: any) => {
+    return `/avatars/${player.avatar || 1}.jpeg`;
   };
 
 
@@ -30,7 +28,7 @@ export function PlayerList() {
         {sortedPlayers.map((player, index) => {
           const isActivePlayer = player.id === activePlayerId;
           const isMe = player.id === myPlayerId;
-          const avatarSrc = getPlayerAvatar(player.id, index);
+          const avatarSrc = getPlayerAvatar(player);
 
           return (
             <div

@@ -82,8 +82,8 @@ function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): voi
 
   switch (message.type) {
     case 'player_join':
-      const { name } = message.payload as PlayerJoinPayload;
-      const player = handlePlayerJoin(name);
+      const { id, name, avatar } = message.payload as PlayerJoinPayload;
+      const player = handlePlayerJoin({ id, name, avatar });
       if (player) {
         ws.playerId = player.id; // Associate player ID with this connection
         ws.playerName = player.name; // Also store the player name

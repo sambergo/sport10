@@ -12,7 +12,7 @@ let turnTimer: NodeJS.Timeout | null = null;
 let timerInterval: NodeJS.Timeout | null = null;
 
 // Track players who want to rejoin the next game
-let nextGamePlayers: string[] = [];
+let nextGamePlayers: { id: string; name: string; avatar: number }[] = [];
 
 // --- Timer Management ---
 
@@ -179,26 +179,27 @@ async function startNewRound() { // Made async to await DB fetch
 
 // --- Player Actions ---
 
-export function handlePlayerJoin(name: string): Player | null {
-    console.log(`Attempting to join: ${name}, current players: ${gameState.players.length}, limit: ${config.playerLimit}, status: ${gameState.status}`);
+export function handlePlayerJoin(profileData: { id: string; name: string; avatar: number }): Player | null {
+    console.log(`Attempting to join: ${profileData.name} (ID: ${profileData.id}), current players: ${gameState.players.length}, limit: ${config.playerLimit}, status: ${gameState.status}`);
     
-    // Check for duplicate names
-    const existingPlayer = gameState.players.find(p => p.name === name);
+    // Check for duplicate names or IDs
+    const existingPlayer = gameState.players.find(p => p.name === profileData.name || p.id === profileData.id);
     
     // Special handling for "Finished" status - allow queuing for next game
     if (gameState.status === 'Finished') {
-        if (existingPlayer && !nextGamePlayers.includes(name)) {
-            nextGamePlayers.push(name);
-            console.log(`Player ${name} queued for next game. Queue: [${nextGamePlayers.join(', ')}]`);
+        if (existingPlayer && !nextGamePlayers.find(p => p.name === profileData.name)) {
+            nextGamePlayers.push(profileData);
+            console.log(`Player ${profileData.name} queued for next game. Queue: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
             return existingPlayer;
         } else if (!existingPlayer) {
             // New player wanting to join next game
-            nextGamePlayers.push(name);
-            console.log(`New player ${name} queued for next game. Queue: [${nextGamePlayers.join(', ')}]`);
+            nextGamePlayers.push(profileData);
+            console.log(`New player ${profileData.name} queued for next game. Queue: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
             // Create a temporary player object for the frontend
             const tempPlayer: Player = {
-                id: uuidv4(),
-                name,
+                id: profileData.id,
+                name: profileData.name,
+                avatar: profileData.avatar,
                 score: 0,
                 roundStatus: 'in_round',
                 lastAnswerCorrect: null,
@@ -217,13 +218,14 @@ export function handlePlayerJoin(name: string): Player | null {
     }
 
     if (existingPlayer) {
-        console.log(`Join failed: player with name ${name} already exists`);
+        console.log(`Join failed: player with name ${profileData.name} or ID ${profileData.id} already exists`);
         return null;
     }
 
     const newPlayer: Player = {
-        id: uuidv4(),
-        name,
+        id: profileData.id,
+        name: profileData.name,
+        avatar: profileData.avatar,
         score: 0,
         roundStatus: gameState.status === 'Answering' ? 'in_round' : 'in_round',
         lastAnswerCorrect: null,
@@ -234,7 +236,7 @@ export function handlePlayerJoin(name: string): Player | null {
 
     updateGameState({ players: [...gameState.players, newPlayer] });
     broadcastGameState();
-    console.log(`Player ${name} joined the game successfully. New player count: ${gameState.players.length}`);
+    console.log(`Player ${profileData.name} joined the game successfully. New player count: ${gameState.players.length}`);
     
     // Auto-start game if this is the first or second player and game is waiting
     if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
@@ -352,14 +354,15 @@ function endGame(reason: string) {
     // Auto-restart after 1 minute
     gameLoopTimeout = setTimeout(() => {
         console.log('Auto-restarting game after 1 minute...');
-        console.log(`Queued players for next game: [${nextGamePlayers.join(', ')}]`);
+        console.log(`Queued players for next game: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
         
         resetGameState();
         
         // Add queued players to the new game
-        const newPlayers: Player[] = nextGamePlayers.map(name => ({
-            id: uuidv4(),
-            name,
+        const newPlayers: Player[] = nextGamePlayers.map(profile => ({
+            id: profile.id,
+            name: profile.name,
+            avatar: profile.avatar,
             score: 0,
             roundStatus: 'in_round' as const,
             lastAnswerCorrect: null,

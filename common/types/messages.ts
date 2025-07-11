@@ -7,7 +7,9 @@ export interface WebSocketMessage<T> {
 // --- Client to Server Message Payloads ---
 
 export interface PlayerJoinPayload {
+  id: string;
   name: string;
+  avatar: number;
 }
 
 export interface AdminActionPayload {

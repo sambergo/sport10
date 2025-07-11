@@ -21,10 +21,9 @@ export function GameActions() {
   // Get top 3 or fewer if less than 3 players
   const topPlayers = sortedPlayers.slice(0, Math.min(3, sortedPlayers.length));
   
-  // Auto-assign avatars based on player ID or index
-  const getPlayerAvatar = (playerId: string, index: number) => {
-    const avatarIndex = ((playerId.charCodeAt(0) + index) % 21) + 1;
-    return `/avatars/${avatarIndex}.jpeg`;
+  // Get player avatar from their profile data
+  const getPlayerAvatar = (player: any) => {
+    return `/avatars/${player.avatar || 1}.jpeg`;
   };
 
   if (!isAnsweringPhase) {
@@ -41,7 +40,7 @@ export function GameActions() {
             return (
               <div key={player.id} className="flex items-center gap-1">
                 <img 
-                  src={getPlayerAvatar(player.id, index)}
+                  src={getPlayerAvatar(player)}
                   alt={player.name}
                   className={`w-6 h-6 rounded-full border transition-all duration-200 ${
                     isMe ? 'border-blue-400 shadow-sm ring-1 ring-blue-400/30' : 'border-white/20'
@@ -81,7 +80,7 @@ export function GameActions() {
             <>
               <span className="text-xs text-blue-300">#{myRank}</span>
               <img 
-                src={getPlayerAvatar(myPlayer.id, myRank - 1)}
+                src={getPlayerAvatar(myPlayer)}
                 alt="You"
                 className="w-6 h-6 rounded-full border border-blue-400 shadow-sm ring-1 ring-blue-400/30"
               />

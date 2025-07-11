@@ -73,9 +73,8 @@ function sendMessage<T>(type: string, payload: T): void {
 export const socketService = {
   connect,
   getPlayerId: () => playerId,
-  joinGame: (name: string) => {
-    // We don't have the ID yet, backend will send it.
-    sendMessage('player_join', { name });
+  joinGame: (profileData: { id: string; name: string; avatar: number }) => {
+    sendMessage('player_join', profileData);
   },
   startGame: (password: string) => {
     sendMessage('admin_start_game', { password });

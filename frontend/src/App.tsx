@@ -10,12 +10,18 @@ import './App.css';
 
 function App() {
   const { status } = useGameStore((state) => state.gameState);
+  const { playerId } = useGameStore((state) => state);
 
   useEffect(() => {
     socketService.connect();
   }, []);
 
   const renderView = () => {
+    // If user hasn't joined yet, always show lobby
+    if (!playerId) {
+      return <LobbyView />;
+    }
+
     switch (status) {
       case 'Waiting':
         return <LobbyView />;

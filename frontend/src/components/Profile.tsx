@@ -29,11 +29,12 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
         setProfile(parsedProfile);
         setName(parsedProfile.name);
         setSelectedAvatar(parsedProfile.avatar);
+        onProfileComplete(parsedProfile);
       } catch (error) {
         console.error('Error loading profile:', error);
       }
     }
-  }, []);
+  }, [onProfileComplete]);
 
   const generateId = () => {
     return Math.random().toString(36).substr(2, 9);

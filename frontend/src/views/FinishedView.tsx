@@ -21,9 +21,6 @@ export function FinishedView() {
             </p>
           )}
           <Scoreboard />
-          <div className="mt-8">
-            <AdminPanel />
-          </div>
         </CardContent>
       </Card>
     </div>

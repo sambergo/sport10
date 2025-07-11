@@ -48,7 +48,6 @@ export function LobbyView() {
               </Button>
             </CardContent>
           </Card>
-          <AdminPanel />
         </div>
         <div>
           <PlayerList />

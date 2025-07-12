@@ -8,7 +8,7 @@ export function PlayerList() {
   const myPlayerId = useGameStore((state) => state.playerId)
 
   const getPlayerAvatar = (player: Player) => {
-    return `/avatars/${player.avatar || 1}.jpeg`
+    return `/avatars/${player.avatar || 1}.png`
   }
 
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
@@ -50,7 +50,7 @@ export function PlayerList() {
                   isMe ? "border-cyan-400 shadow-md shadow-cyan-400/50" : "border-slate-500"
                 }`}
                 onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = "/avatars/1.jpeg"
+                  ;(e.target as HTMLImageElement).src = "/avatars/1.png"
                 }}
               />
               {isActivePlayer && (

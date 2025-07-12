@@ -115,13 +115,13 @@ export function FinishedView() {
                   <div className="flex-shrink-0 w-10 flex justify-center">{getRankIcon()}</div>
 
                   <img
-                    src={`/avatars/${player.avatar || 1}.jpeg`}
+                    src={`/avatars/${player.avatar || 1}.png`}
                     alt={`${player.name}'s avatar`}
                     className={`w-12 h-12 rounded-full border-2 ${
                       isMe ? "border-cyan-400" : index === 0 ? "border-yellow-400" : "border-slate-500"
                     }`}
                     onError={(e) => {
-                      ;(e.target as HTMLImageElement).src = "/avatars/1.jpeg"
+                      ;(e.target as HTMLImageElement).src = "/avatars/1.png"
                     }}
                   />
 

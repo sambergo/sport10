@@ -20,7 +20,7 @@ export function GameActions() {
   const topPlayers = sortedPlayers.slice(0, Math.min(3, sortedPlayers.length))
 
   const getPlayerAvatar = (player: Player) => {
-    return `/avatars/${player.avatar || 1}.jpeg`
+    return `/avatars/${player.avatar || 1}.png`
   }
 
   if (!isAnsweringPhase) {

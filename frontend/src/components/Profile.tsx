@@ -57,7 +57,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
     setProfile(null)
   }
 
-  const avatarNumbers = Array.from({ length: 21 }, (_, i) => i + 1)
+  const avatarNumbers = Array.from({ length: 48 }, (_, i) => i + 1)
 
   if (profile && !disabled) {
     return (
@@ -65,11 +65,11 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
         <div className="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/50">
           <div className="relative">
             <img
-              src={`/avatars/${profile.avatar}.jpeg`}
+              src={`/avatars/${profile.avatar}.png`}
               alt="Your avatar"
               className="w-20 h-20 rounded-full border-2 border-cyan-400 shadow-lg shadow-cyan-400/25"
               onError={(e) => {
-                ;(e.target as HTMLImageElement).src = "/avatars/1.jpeg"
+                ;(e.target as HTMLImageElement).src = "/avatars/1.png"
               }}
             />
             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-slate-900 flex items-center justify-center">
@@ -122,11 +122,11 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
               disabled={disabled}
             >
               <img
-                src={`/avatars/${avatarNum}.jpeg`}
+                src={`/avatars/${avatarNum}.png`}
                 alt={`Avatar ${avatarNum}`}
                 className="w-full h-full rounded-full object-cover"
                 onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = "/avatars/1.jpeg"
+                  ;(e.target as HTMLImageElement).src = "/avatars/1.png"
                 }}
               />
             </button>

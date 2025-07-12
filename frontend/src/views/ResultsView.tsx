@@ -1,64 +1,75 @@
-// src/views/ResultsView.tsx
-import { GameTopBar } from '@/components/GameTopBar';
-import { Scoreboard } from '@/components/Scoreboard';
-import { QuestionDisplay } from '@/components/QuestionDisplay';
-import { useGameStore } from '@/store/gameStore';
-import type { AnswerOption } from '../../../common/types/game';
+
+import { GameTopBar } from "@/components/GameTopBar"
+import { PlayerList } from "@/components/PlayerList"
+import { QuestionDisplay } from "@/components/QuestionDisplay"
+import { useGameStore } from "@/store/gameStore"
+import type { AnswerOption } from "@/types/game"
+import { CheckCircle, XCircle } from "lucide-react"
 
 export function ResultsView() {
-  const { currentQuestion } = useGameStore((state) => state.gameState);
+  const { currentQuestion } = useGameStore((state) => state.gameState)
 
-  // Letter mapping for answer options
-  const getAnswerLetter = (index: number) => String.fromCharCode(65 + index); // A, B, C, D...
+  const getAnswerLetter = (index: number) => String.fromCharCode(65 + index)
 
   return (
-    <div className="min-h-screen flex flex-col pt-1 pb-2">
+    <div className="h-screen flex flex-col">
+      {/* Fixed Top Bar */}
       <GameTopBar />
 
-      {/* Scoreboard section */}
-      <div className="px-4 flex-1">
-        <Scoreboard />
-      </div>
-      {/* Question section */}
-      <div className="flex-shrink-0 px-4 pt-1 pb-2">
-        <QuestionDisplay />
-      </div>
-
-      {/* Results content */}
-      <div className="flex-1 px-1 flex flex-col gap-4">
-        {/* Correct answers section */}
-        {currentQuestion && (
-          <div className="px-4">
-            <h3 className="text-sm font-medium text-[var(--color-text-secondary)] mb-3 text-center">
-              Correct Answers
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {currentQuestion.options.map((option: AnswerOption, index: number) => (
-                <div
-                  key={index}
-                  className={`min-h-[80px] flex flex-col justify-center items-center text-center transition-all duration-200 rounded-xl px-3 py-4 border ${option.isCorrect
-                      ? 'game-button-success'
-                      : 'bg-gradient-to-r from-[var(--color-background-accent)] to-[var(--color-background-secondary)] border-white/10 opacity-50'
-                    }`}
-                >
-                  <div className="flex flex-col items-center gap-2 w-full h-full justify-center">
-                    <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold">
-                      {getAnswerLetter(index)}
-                    </span>
-                    <span className="flex-1 text-sm font-medium leading-tight px-2 flex items-center">
-                      {option.text}
-                    </span>
-                    {option.isCorrect && (
-                      <span className="flex-shrink-0 text-lg">✅</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* Main Content Area - scrollable if needed */}
+      <div className="flex-1 flex flex-col pt-16 pb-4 overflow-auto">
+        {/* Scoreboard section */}
+        <div className="flex-shrink-0 px-4 py-3">
+          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-white mb-4 text-center">Round Results</h2>
+            <PlayerList />
           </div>
-        )}
+        </div>
 
+        {/* Question section */}
+        <div className="flex-shrink-0 px-4 py-3">
+          <QuestionDisplay />
+        </div>
+
+        {/* Results content */}
+        <div className="flex-1 px-4 pb-6">
+          {currentQuestion && (
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl">
+              <h3 className="text-lg font-bold text-white mb-6 text-center">Answer Breakdown</h3>
+              <div
+                className={`grid gap-4 ${currentQuestion.options.length <= 4
+                  ? "grid-cols-1 sm:grid-cols-2"
+                  : currentQuestion.options.length <= 6
+                    ? "grid-cols-2 sm:grid-cols-3"
+                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                  }`}
+              >
+                {currentQuestion.options.map((option: AnswerOption, index: number) => (
+                  <div
+                    key={index}
+                    className={`min-h-[100px] flex flex-col justify-center items-center text-center transition-all duration-300 rounded-xl p-4 border-2 ${option.isCorrect
+                      ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 shadow-lg shadow-green-500/25 animate-in scale-in-95 duration-500"
+                      : "bg-gradient-to-r from-slate-700/50 to-slate-600/50 border-slate-600/50 opacity-70"
+                      }`}
+                  >
+                    <div className="flex flex-col items-center gap-3 w-full">
+                      <div className="flex items-start gap-3 w-full">
+                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                          {getAnswerLetter(index)}
+                        </div>
+                        <span className="flex-1 text-sm font-medium leading-tight text-left text-white break-words">
+                          {option.text}
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  );
+  )
 }

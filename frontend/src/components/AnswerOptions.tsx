@@ -1,73 +1,90 @@
-// src/components/AnswerOptions.tsx
-import { useGameStore } from '@/store/gameStore';
-import type { AnswerOption, Player } from '../../../common/types/game';
-import { socketService } from '@/services/socketService';
+import { useGameStore } from "@/store/gameStore"
+import type { AnswerOption, Player } from "@/types/game"
+import { socketService } from "@/services/socketService"
+import { CheckCircle, XCircle } from "lucide-react"
 
 export function AnswerOptions() {
-  const { currentQuestion, status, activePlayerId, players } = useGameStore((state) => state.gameState);
-  const myPlayerId = useGameStore((state) => state.playerId);
+  const { currentQuestion, status, activePlayerId, players } = useGameStore((state) => state.gameState)
+  const myPlayerId = useGameStore((state) => state.playerId)
 
-  if (!currentQuestion) return null;
+  if (!currentQuestion) return null
 
   const handleSelectAnswer = (index: number) => {
-    socketService.submitAnswer(index);
-  };
+    socketService.submitAnswer(index)
+  }
 
-  const isMyTurn = activePlayerId === myPlayerId;
-  const isAnsweringPhase = status === 'Answering';
+  const isMyTurn = activePlayerId === myPlayerId
+  const isAnsweringPhase = status === "Answering"
+  const revealedCorrectAnswers = players.flatMap((p: Player) => p.roundAnswers)
+  const revealedIncorrectAnswers = currentQuestion.revealedIncorrectAnswers || []
 
-  const revealedCorrectAnswers = players.flatMap((p: Player) => p.roundAnswers);
-  const revealedIncorrectAnswers = currentQuestion.revealedIncorrectAnswers || [];
-
-  // Letter mapping for answer options
-  const getAnswerLetter = (index: number) => String.fromCharCode(65 + index); // A, B, C, D...
+  const getAnswerLetter = (index: number) => String.fromCharCode(65 + index)
 
   return (
-    <div className="animate-scale-in flex-1 flex flex-col min-h-0">
-      {/* 2-Column Answer Grid for Mobile */}
-      <div className="grid grid-cols-2 gap-3 flex-1 content-start">
+    <div className="w-full h-full">
+      {/* Grid that adapts to number of options */}
+      <div
+        className={`grid gap-3 h-full ${currentQuestion.options.length <= 4
+            ? "grid-cols-1 sm:grid-cols-2"
+            : currentQuestion.options.length <= 6
+              ? "grid-cols-2 sm:grid-cols-3"
+              : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+          } animate-in fade-in duration-500`}
+      >
         {currentQuestion.options.map((option: AnswerOption, index: number) => {
-          const isRevealedCorrect = revealedCorrectAnswers.includes(index);
-          const isRevealedIncorrect = revealedIncorrectAnswers.includes(index);
-          const isRevealed = isRevealedCorrect || isRevealedIncorrect;
-          const isDisabled = !isAnsweringPhase || !isMyTurn || isRevealed;
+          const isRevealedCorrect = revealedCorrectAnswers.includes(index)
+          const isRevealedIncorrect = revealedIncorrectAnswers.includes(index)
+          const isRevealed = isRevealedCorrect || isRevealedIncorrect
+          const isDisabled = !isAnsweringPhase || !isMyTurn || isRevealed
 
           const getButtonClass = () => {
-            if (isRevealedCorrect) return 'game-button-success';
-            if (isRevealedIncorrect) return 'bg-gradient-to-r from-[var(--color-status-error)] to-[var(--color-pink-primary)] text-white font-medium rounded-xl px-3 py-4 opacity-50';
-            if (isDisabled) return 'game-button-ghost opacity-50';
-            return 'game-button-primary hover:scale-[1.02]';
-          };
-
-          const getIcon = () => {
-            if (isRevealedCorrect) return '✅';
-            if (isRevealedIncorrect) return '❌';
-            return '';
-          };
+            if (isRevealedCorrect) {
+              return "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-green-400 shadow-lg shadow-green-500/25"
+            }
+            if (isRevealedIncorrect) {
+              return "bg-gradient-to-r from-red-500/50 to-pink-500/50 text-white border-red-400/50 opacity-60"
+            }
+            if (isDisabled) {
+              return "bg-slate-700/50 text-slate-400 border-slate-600/50 opacity-50"
+            }
+            return "bg-gradient-to-r from-slate-700 to-slate-600 hover:from-cyan-600 hover:to-purple-600 text-white border-slate-500 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-[1.02] active:scale-[0.98]"
+          }
 
           return (
             <button
               key={index}
               onClick={() => handleSelectAnswer(index)}
               disabled={isDisabled}
-              className={`${getButtonClass()} min-h-[80px] flex flex-col justify-center items-center text-center transition-all duration-200 ${!isDisabled ? 'active:scale-95' : ''}`}
+              className={`${getButtonClass()} min-h-[70px] p-3 rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center group`}
             >
               <div className="flex flex-col items-center gap-2 w-full h-full justify-center">
-                <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold">
-                  {getAnswerLetter(index)}
-                </span>
-                <span className="flex-1 text-sm font-medium leading-tight px-2 flex items-center">
-                  {option.text}
-                </span>
-                {getIcon() && (
-                  <span className="flex-shrink-0 text-lg">{getIcon()}</span>
+                {/* Answer letter and text */}
+                <div className="flex items-start gap-2 w-full">
+                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                    {getAnswerLetter(index)}
+                  </div>
+                  <span className="flex-1 text-xs font-medium leading-tight text-left break-words">{option.text}</span>
+                </div>
+
+                {/* Status indicators */}
+                {isRevealedCorrect && (
+                  <div className="flex items-center gap-1 text-green-300 mt-1">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="text-xs font-bold">CORRECT!</span>
+                  </div>
+                )}
+
+                {isRevealedIncorrect && (
+                  <div className="flex items-center gap-1 text-red-300 mt-1">
+                    <XCircle className="w-4 h-4" />
+                    <span className="text-xs font-bold">WRONG</span>
+                  </div>
                 )}
               </div>
             </button>
-          );
+          )
         })}
       </div>
-
     </div>
-  );
+  )
 }

@@ -1,97 +1,95 @@
-// src/components/GameActions.tsx
-import { useGameStore } from '@/store/gameStore';
-import type { Player } from '../../../common/types/game';
-import { socketService } from '@/services/socketService';
+import { useGameStore } from "@/store/gameStore"
+import type { Player } from "@/types/game"
+import { socketService } from "@/services/socketService"
+import { SkipForward, Clock, Trophy } from "lucide-react"
 
 export function GameActions() {
-  const { activePlayerId, status, players } = useGameStore((state) => state.gameState);
-  const myPlayerId = useGameStore((state) => state.playerId);
+  const { activePlayerId, status, players } = useGameStore((state) => state.gameState)
+  const myPlayerId = useGameStore((state) => state.playerId)
 
   const handlePassTurn = () => {
-    socketService.passTurn();
-  };
+    socketService.passTurn()
+  }
 
-  const isMyTurn = activePlayerId === myPlayerId;
-  const isAnsweringPhase = status === 'Answering';
+  const isMyTurn = activePlayerId === myPlayerId
+  const isAnsweringPhase = status === "Answering"
 
-  // Get top 3 players and user's rank
-  const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
-  const myRank = sortedPlayers.findIndex(p => p.id === myPlayerId) + 1;
-  const myPlayer = sortedPlayers.find(p => p.id === myPlayerId);
-  
-  // Get top 3 or fewer if less than 3 players
-  const topPlayers = sortedPlayers.slice(0, Math.min(3, sortedPlayers.length));
-  
-  // Get player avatar from their profile data
+  const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
+  const myRank = sortedPlayers.findIndex((p) => p.id === myPlayerId) + 1
+  const myPlayer = sortedPlayers.find((p) => p.id === myPlayerId)
+  const topPlayers = sortedPlayers.slice(0, Math.min(3, sortedPlayers.length))
+
   const getPlayerAvatar = (player: Player) => {
-    return `/avatars/${player.avatar || 1}.jpeg`;
-  };
+    return `/avatars/${player.avatar || 1}.jpeg`
+  }
 
   if (!isAnsweringPhase) {
-    return null;
+    return null
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 glassmorphism border-t border-white/10 p-3 animate-slide-up">
-      <div className="flex items-center justify-between max-w-full mx-auto px-2">
-        {/* Compact Scoreboard - Top 3 Players */}
-        <div className="flex items-center gap-2 flex-1">
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-700/50 px-4 py-3 shadow-lg animate-in slide-in-from-bottom duration-300 h-20">
+      <div className="flex items-center justify-between max-w-full mx-auto h-full">
+        {/* Left: Top Players */}
+        <div className="flex items-center gap-1 flex-1 min-w-0">
           {topPlayers.slice(0, 3).map((player, index) => {
-            const isMe = player.id === myPlayerId;
+            const isMe = player.id === myPlayerId
+            const rankIcon = index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"
+
             return (
               <div key={player.id} className="flex items-center gap-1">
-                <img 
-                  src={getPlayerAvatar(player)}
-                  alt={player.name}
-                  className={`w-6 h-6 rounded-full border transition-all duration-200 ${
-                    isMe ? 'border-blue-400 shadow-sm ring-1 ring-blue-400/30' : 'border-white/20'
-                  }`}
-                />
-                <span className={`text-xs font-medium ${
-                  isMe ? 'text-blue-200' : 'text-[var(--color-text-primary)]'
-                }`}>
-                  {player.score}
-                  {isMe && <span className="text-blue-300 ml-0.5">*</span>}
-                </span>
-                {index < 2 && <span className="text-[var(--color-text-secondary)]">•</span>}
+                <div className="flex items-center gap-1 bg-slate-800/50 px-1.5 py-1 rounded-full border border-slate-600/50">
+                  <span className="text-xs">{rankIcon}</span>
+                  <img
+                    src={getPlayerAvatar(player) || "/placeholder.svg?height=20&width=20"}
+                    alt={player.name}
+                    className={`w-5 h-5 rounded-full border ${isMe ? "border-cyan-400" : "border-slate-500"}`}
+                  />
+                  <span className={`text-xs font-bold ${isMe ? "text-cyan-400" : "text-white"}`}>
+                    {player.score}
+                    {isMe && <span className="text-cyan-300">*</span>}
+                  </span>
+                </div>
+                {index < 2 && <span className="text-slate-600 text-xs">•</span>}
               </div>
-            );
+            )
           })}
         </div>
 
-        {/* Main Action Button */}
-        {isMyTurn ? (
-          <button 
-            onClick={handlePassTurn}
-            className="game-button-secondary flex items-center gap-1 px-4 py-2"
-          >
-            <span>⏭️</span>
-            <span className="text-sm">Pass</span>
-          </button>
-        ) : (
-          <div className="game-button-ghost flex items-center gap-1 px-4 py-2 opacity-50">
-            <span>⏳</span>
-            <span className="text-sm">Wait</span>
-          </div>
-        )}
+        {/* Center: Action Button */}
+        <div className="flex-shrink-0 mx-2">
+          {isMyTurn ? (
+            <button
+              onClick={handlePassTurn}
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-orange-500/25"
+            >
+              <SkipForward className="w-3 h-3" />
+              <span className="text-sm">Pass</span>
+            </button>
+          ) : (
+            <div className="bg-slate-700/50 text-slate-400 px-4 py-2 rounded-lg font-bold flex items-center gap-1 border border-slate-600/50">
+              <Clock className="w-3 h-3" />
+              <span className="text-sm">Wait</span>
+            </div>
+          )}
+        </div>
 
-        {/* User's Rank (if not in top 3) */}
-        <div className="flex items-center gap-1 flex-1 justify-end">
+        {/* Right: My Rank (if not in top 3) */}
+        <div className="flex items-center gap-1 flex-1 justify-end min-w-0">
           {myRank > 3 && myPlayer && (
-            <>
-              <span className="text-xs text-blue-300">#{myRank}</span>
-              <img 
-                src={getPlayerAvatar(myPlayer)}
+            <div className="flex items-center gap-1 bg-slate-800/50 px-1.5 py-1 rounded-full border border-slate-600/50">
+              <Trophy className="w-3 h-3 text-cyan-400" />
+              <span className="text-xs text-cyan-400 font-bold">#{myRank}</span>
+              <img
+                src={getPlayerAvatar(myPlayer) || "/placeholder.svg?height=20&width=20"}
                 alt="You"
-                className="w-6 h-6 rounded-full border border-blue-400 shadow-sm ring-1 ring-blue-400/30"
+                className="w-5 h-5 rounded-full border border-cyan-400"
               />
-              <span className="text-xs font-medium text-blue-200">
-                {myPlayer.score}*
-              </span>
-            </>
+              <span className="text-xs font-bold text-cyan-400">{myPlayer.score}*</span>
+            </div>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }

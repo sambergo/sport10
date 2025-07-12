@@ -322,7 +322,7 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
     // Auto-start game if this is the first or second player and game is waiting
     if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
         console.log('Auto-starting game...');
-        setTimeout(() => autoStartGame(), config.autoStartDelayMs); // delay for more players to join
+        autoStartGame(); // Start immediately, Starting state provides the delay
     }
 
     return newPlayer;
@@ -411,8 +411,17 @@ export function handlePassTurn(playerId: string): boolean {
 function autoStartGame(): void {
     if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
         console.log(`Auto-starting game with players: ${gameState.players.map(p => `${p.name}:${p.id}`).join(', ')}`);
-        startNewRound();
-        console.log('Game auto-started.');
+        
+        // Transition to Starting state
+        updateGameState({ status: 'Starting' });
+        broadcastGameState();
+        console.log('Game entered Starting state');
+        
+        // After gameRestartDelaySeconds, start the first round
+        setTimeout(() => {
+            startNewRound();
+            console.log('Game auto-started - moved from Starting to Answering.');
+        }, config.gameRestartDelaySeconds * 1000);
     }
 }
 
@@ -466,7 +475,7 @@ function endGame(reason: string): void {
 
         // If there are players, auto-start immediately
         if (gameState.players.length >= 1) {
-            setTimeout(() => autoStartGame(), config.autoStartDelayMs);
+            autoStartGame(); // Start immediately, Starting state provides the delay
         }
     }, config.gameRestartDelaySeconds * 1000);
 }

@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { PlayerList } from "@/components/PlayerList"
 import { Profile, type ProfileData } from "@/components/Profile"
@@ -10,9 +10,12 @@ import { Sparkles, Users } from "lucide-react"
 
 export function LobbyView() {
   const [userProfile, setUserProfile] = useState<ProfileData | null>(null)
+  const [timer, setTimer] = useState<number>(0)
   const { players, status } = useGameStore((state) => state.gameState)
   const { playerId } = useGameStore((state) => state)
   const myPlayer = players.find((p: Player) => p.id === playerId)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const prevStatusRef = useRef<string>(status)
 
   const handleProfileComplete = (profile: ProfileData) => {
     setUserProfile(profile)
@@ -24,9 +27,34 @@ export function LobbyView() {
     }
   }
 
+  useEffect(() => {
+    if (prevStatusRef.current === "Waiting" && status === "Starting") {
+      setTimer(0)
+      intervalRef.current = setInterval(() => {
+        setTimer(prev => prev + 1)
+      }, 1000)
+    }
+
+    if (status !== "Starting" && intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+
+    prevStatusRef.current = status
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [status])
+
   const getTitle = () => {
     if (status === "Waiting") {
       return "Waiting for Game to Start"
+    }
+    if (status === "Starting") {
+      return `Game Starting... ${timer}s`
     }
     return myPlayer ? "You can join the current game!" : "Game in Progress - Join Now!"
   }
@@ -70,7 +98,7 @@ export function LobbyView() {
                 <Button
                   onClick={handleJoinGame}
                   className="w-full h-14 text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                  disabled={!!myPlayer}
+                  disabled={!!myPlayer || status === "Starting"}
                 >
                   {myPlayer ? (
                     <span className="flex items-center gap-2">
@@ -79,6 +107,8 @@ export function LobbyView() {
                     </span>
                   ) : status === "Waiting" ? (
                     "Join Game"
+                  ) : status === "Starting" ? (
+                    "Game Starting..."
                   ) : (
                     "Join Current Game"
                   )}

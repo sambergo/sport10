@@ -1,7 +1,6 @@
 // src/config.ts
 
 export const config = {
-  adminPassword: 'p',
   winScore: 20,
   timeLimitSeconds: 45,
   playerLimit: 8,

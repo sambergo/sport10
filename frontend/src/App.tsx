@@ -22,6 +22,8 @@ export default function App() {
     switch (status) {
       case "Waiting":
         return <LobbyView />
+      case "Starting":
+        return <LobbyView />
       case "Answering":
         return <GameView />
       case "Results":

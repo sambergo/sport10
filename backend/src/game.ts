@@ -28,14 +28,14 @@ export function resetGame(): void {
 }
 
 /**
- * Starts the game, changing the status from Waiting.
+ * Starts the game, changing the status from Waiting to Starting.
  */
 export function startGame(): void {
   if (gameState.status === 'Waiting') {
-    gameState.status = 'Answering'; // Or a 'Starting' state if needed
+    gameState.status = 'Starting';
     gameState.currentRound = 1;
-    console.log('Game has started');
-    // Logic to select the first question will be added here
+    console.log('Game has started - entering Starting state');
+    // Logic to select the first question will be added in gameService
   }
 }
 

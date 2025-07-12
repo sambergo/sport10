@@ -5,11 +5,7 @@ const router = express.Router();
 
 router.get('/config', (req, res) => {
   res.json({
-    gameRestartDelaySeconds: config.gameRestartDelaySeconds,
-    timeLimitSeconds: config.timeLimitSeconds,
-    winScore: config.winScore,
-    playerLimit: config.playerLimit,
-    maxRounds: config.maxRounds
+    ...config
   });
 });
 

@@ -17,8 +17,9 @@ export function FinishedView() {
     fetch("/api/config")
       .then((res) => res.json())
       .then((config) => {
-        setGameRestartDelay(config.gameRestartDelaySeconds)
-        setTimeLeft(config.gameRestartDelaySeconds)
+        const timer = config.gameRestartDelaySeconds + (config.autoStartDelayMs / 1000)
+        setGameRestartDelay(timer)
+        setTimeLeft(timer)
       })
       .catch((err) => {
         console.warn("Failed to fetch config, using default:", err)
@@ -104,33 +105,30 @@ export function FinishedView() {
               return (
                 <div
                   key={player.id}
-                  className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 ${
-                    index === 0
+                  className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 ${index === 0
                       ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/50 shadow-lg shadow-yellow-500/25"
                       : isMe
                         ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400/50 shadow-lg shadow-cyan-500/25"
                         : "bg-slate-700/30 border-slate-600/50"
-                  }`}
+                    }`}
                 >
                   <div className="flex-shrink-0 w-10 flex justify-center">{getRankIcon()}</div>
 
                   <img
                     src={`/avatars/${player.avatar || 1}.png`}
                     alt={`${player.name}'s avatar`}
-                    className={`w-12 h-12 rounded-full border-2 ${
-                      isMe ? "border-cyan-400" : index === 0 ? "border-yellow-400" : "border-slate-500"
-                    }`}
+                    className={`w-12 h-12 rounded-full border-2 ${isMe ? "border-cyan-400" : index === 0 ? "border-yellow-400" : "border-slate-500"
+                      }`}
                     onError={(e) => {
-                      ;(e.target as HTMLImageElement).src = "/avatars/1.png"
+                      ; (e.target as HTMLImageElement).src = "/avatars/1.png"
                     }}
                   />
 
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3
-                        className={`font-bold ${
-                          isMe ? "text-cyan-400" : index === 0 ? "text-yellow-400" : "text-white"
-                        }`}
+                        className={`font-bold ${isMe ? "text-cyan-400" : index === 0 ? "text-yellow-400" : "text-white"
+                          }`}
                       >
                         {player.name}
                       </h3>
@@ -144,9 +142,8 @@ export function FinishedView() {
 
                   <div className="text-right">
                     <div
-                      className={`text-2xl font-bold ${
-                        isMe ? "text-cyan-400" : index === 0 ? "text-yellow-400" : "text-white"
-                      }`}
+                      className={`text-2xl font-bold ${isMe ? "text-cyan-400" : index === 0 ? "text-yellow-400" : "text-white"
+                        }`}
                     >
                       {player.score}
                     </div>

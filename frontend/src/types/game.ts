@@ -19,7 +19,7 @@ export interface Question {
 }
 
 export interface GameState {
-  status: "Waiting" | "Answering" | "Results" | "Finished"
+  status: "Waiting" | "Starting" | "Answering" | "Results" | "Finished"
   players: Player[]
   currentQuestion: Question | null
   currentRound: number

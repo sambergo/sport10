@@ -1,11 +1,18 @@
 import { create } from "zustand"
 import type { GameState } from "@/types/game"
 
+interface GameConfig {
+  gameRestartDelaySeconds: number
+  autoStartDelayMs: number
+}
+
 interface GameStore {
   gameState: GameState
   playerId: string | null
+  config: GameConfig | null
   setGameState: (newState: GameState) => void
   setPlayerId: (id: string) => void
+  fetchConfig: () => Promise<void>
 }
 
 const initialState: GameState = {

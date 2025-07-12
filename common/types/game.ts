@@ -32,7 +32,7 @@ export interface Player {
   roundScore: number;
 }
 
-export type GameStatus = 'Waiting' | 'Answering' | 'Results' | 'Finished';
+export type GameStatus = 'Waiting' | 'Starting' | 'Answering' | 'Results' | 'Finished';
 
 export interface GameState {
   status: GameStatus;

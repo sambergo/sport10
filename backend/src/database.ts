@@ -41,7 +41,7 @@ export async function initDatabase() {
   // Seed if empty
   const categoryCount = await db.get('SELECT COUNT(*) as count FROM categories');
   if (categoryCount.count === 0) {
-    await seedDatabase();
+    // await seedDatabase();
   }
 
   console.log('Database initialized');

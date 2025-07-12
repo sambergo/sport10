@@ -2,7 +2,7 @@
 import { useGameStore } from '@/store/gameStore';
 
 export function QuestionDisplay() {
-  const question = useGameStore((state: any) => state.gameState.currentQuestion);
+  const question = useGameStore((state) => state.gameState.currentQuestion);
 
   if (!question) {
     return (

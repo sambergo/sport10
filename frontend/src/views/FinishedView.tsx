@@ -1,19 +1,20 @@
 // src/views/FinishedView.tsx
 import { Scoreboard } from '@/components/Scoreboard';
 import { useGameStore } from '@/store/gameStore';
+import type { Player } from '../../../common/types/game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { socketService } from '@/services/socketService';
 import { useState, useEffect } from 'react';
 
 export function FinishedView() {
-  const { players } = useGameStore((state: any) => state.gameState);
+  const { players } = useGameStore((state) => state.gameState);
   const playerId = useGameStore((state) => state.playerId);
-  const winner = players.sort((a: any, b: any) => b.score - a.score)[0];
+  const winner = players.sort((a: Player, b: Player) => b.score - a.score)[0];
   const [timeLeft, setTimeLeft] = useState(60);
   const [gameRestartDelay, setGameRestartDelay] = useState(60);
 
-  const currentPlayer = players.find((p: any) => p.id === playerId);
+  const currentPlayer = players.find((p: Player) => p.id === playerId);
 
   useEffect(() => {
     // Fetch config from backend

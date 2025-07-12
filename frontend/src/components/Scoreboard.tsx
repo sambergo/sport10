@@ -1,13 +1,14 @@
 // src/components/Scoreboard.tsx
 import { useGameStore } from '@/store/gameStore';
+import type { Player } from '../../../common/types/game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function Scoreboard() {
-  const players = useGameStore((state: any) => state.gameState.players);
-  const currentPlayerId = useGameStore((state: any) => state.playerId);
+  const players = useGameStore((state) => state.gameState.players);
+  const currentPlayerId = useGameStore((state) => state.playerId);
 
   // Get player avatar from their profile data
-  const getPlayerAvatar = (player: any) => {
+  const getPlayerAvatar = (player: Player) => {
     return `/avatars/${player.avatar || 1}.jpeg`;
   };
 

@@ -5,12 +5,13 @@ import { PlayerList } from '@/components/PlayerList';
 import { Profile, type ProfileData } from '@/components/Profile';
 import { socketService } from '@/services/socketService';
 import { useGameStore } from '@/store/gameStore';
+import type { Player } from '../../../common/types/game';
 
 export function LobbyView() {
   const [userProfile, setUserProfile] = useState<ProfileData | null>(null);
-  const { players, status } = useGameStore((state: any) => state.gameState);
+  const { players, status } = useGameStore((state) => state.gameState);
   const { playerId } = useGameStore((state) => state);
-  const myPlayer = players.find((p: any) => p.id === playerId);
+  const myPlayer = players.find((p: Player) => p.id === playerId);
 
   const handleProfileComplete = (profile: ProfileData) => {
     setUserProfile(profile);

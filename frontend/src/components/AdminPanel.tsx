@@ -26,7 +26,7 @@ export function AdminPanel() {
           type="password"
           placeholder="Admin Password"
           value={password}
-          onChange={(e: any) => setPassword(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
         />
         <div className="flex flex-col space-y-4">
           <Button onClick={handleStart} className="w-full">Start Game</Button>

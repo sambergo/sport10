@@ -3,9 +3,10 @@ import { GameTopBar } from '@/components/GameTopBar';
 import { Scoreboard } from '@/components/Scoreboard';
 import { QuestionDisplay } from '@/components/QuestionDisplay';
 import { useGameStore } from '@/store/gameStore';
+import type { AnswerOption } from '../../../common/types/game';
 
 export function ResultsView() {
-  const { currentQuestion } = useGameStore((state: any) => state.gameState);
+  const { currentQuestion } = useGameStore((state) => state.gameState);
 
   // Letter mapping for answer options
   const getAnswerLetter = (index: number) => String.fromCharCode(65 + index); // A, B, C, D...
@@ -32,7 +33,7 @@ export function ResultsView() {
               Correct Answers
             </h3>
             <div className="grid grid-cols-2 gap-3">
-              {currentQuestion.options.map((option: any, index: number) => (
+              {currentQuestion.options.map((option: AnswerOption, index: number) => (
                 <div
                   key={index}
                   className={`min-h-[80px] flex flex-col justify-center items-center text-center transition-all duration-200 rounded-xl px-3 py-4 border ${option.isCorrect

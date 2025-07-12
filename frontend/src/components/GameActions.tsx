@@ -1,10 +1,11 @@
 // src/components/GameActions.tsx
 import { useGameStore } from '@/store/gameStore';
+import type { Player } from '../../../common/types/game';
 import { socketService } from '@/services/socketService';
 
 export function GameActions() {
-  const { activePlayerId, status, players } = useGameStore((state: any) => state.gameState);
-  const myPlayerId = useGameStore((state: any) => state.playerId);
+  const { activePlayerId, status, players } = useGameStore((state) => state.gameState);
+  const myPlayerId = useGameStore((state) => state.playerId);
 
   const handlePassTurn = () => {
     socketService.passTurn();
@@ -22,7 +23,7 @@ export function GameActions() {
   const topPlayers = sortedPlayers.slice(0, Math.min(3, sortedPlayers.length));
   
   // Get player avatar from their profile data
-  const getPlayerAvatar = (player: any) => {
+  const getPlayerAvatar = (player: Player) => {
     return `/avatars/${player.avatar || 1}.jpeg`;
   };
 

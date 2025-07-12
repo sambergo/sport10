@@ -1,10 +1,11 @@
 // src/components/AnswerOptions.tsx
 import { useGameStore } from '@/store/gameStore';
+import type { AnswerOption, Player } from '../../../common/types/game';
 import { socketService } from '@/services/socketService';
 
 export function AnswerOptions() {
-  const { currentQuestion, status, activePlayerId, players } = useGameStore((state: any) => state.gameState);
-  const myPlayerId = useGameStore((state: any) => state.playerId);
+  const { currentQuestion, status, activePlayerId, players } = useGameStore((state) => state.gameState);
+  const myPlayerId = useGameStore((state) => state.playerId);
 
   if (!currentQuestion) return null;
 
@@ -15,7 +16,7 @@ export function AnswerOptions() {
   const isMyTurn = activePlayerId === myPlayerId;
   const isAnsweringPhase = status === 'Answering';
 
-  const revealedCorrectAnswers = players.flatMap((p: any) => p.roundAnswers);
+  const revealedCorrectAnswers = players.flatMap((p: Player) => p.roundAnswers);
   const revealedIncorrectAnswers = currentQuestion.revealedIncorrectAnswers || [];
 
   // Letter mapping for answer options
@@ -25,7 +26,7 @@ export function AnswerOptions() {
     <div className="animate-scale-in flex-1 flex flex-col min-h-0">
       {/* 2-Column Answer Grid for Mobile */}
       <div className="grid grid-cols-2 gap-3 flex-1 content-start">
-        {currentQuestion.options.map((option: any, index: number) => {
+        {currentQuestion.options.map((option: AnswerOption, index: number) => {
           const isRevealedCorrect = revealedCorrectAnswers.includes(index);
           const isRevealedIncorrect = revealedIncorrectAnswers.includes(index);
           const isRevealed = isRevealedCorrect || isRevealedIncorrect;

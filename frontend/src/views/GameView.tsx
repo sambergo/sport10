@@ -8,9 +8,9 @@ import { GameTopBar } from '@/components/GameTopBar';
 import { useGameStore } from '@/store/gameStore';
 
 export function GameView() {
-  const { status } = useGameStore((state: any) => state.gameState);
+  const { status } = useGameStore((state) => state.gameState);
 
-  const isGameActive = status === 'Answering' || status === 'Revealing';
+  const isGameActive = status === 'Answering' || status === 'Results';
 
   // Always use focused layout when game is active
   if (isGameActive) {

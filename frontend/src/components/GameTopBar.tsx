@@ -1,12 +1,13 @@
 // src/components/GameTopBar.tsx
 import { useGameStore } from '@/store/gameStore';
+import type { Player } from '../../../common/types/game';
 
 export function GameTopBar() {
-  const { currentQuestion, activePlayerId, players, currentRound, timer } = useGameStore((state: any) => state.gameState);
-  const myPlayerId = useGameStore((state: any) => state.playerId);
+  const { currentQuestion, activePlayerId, players, currentRound, timer } = useGameStore((state) => state.gameState);
+  const myPlayerId = useGameStore((state) => state.playerId);
 
   const isMyTurn = activePlayerId === myPlayerId;
-  const activePlayer = players.find((p: any) => p.id === activePlayerId);
+  const activePlayer = players.find((p: Player) => p.id === activePlayerId);
 
   // Timer color based on time remaining
   const getTimerColor = (time: number) => {

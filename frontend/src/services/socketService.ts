@@ -25,20 +25,21 @@ function connect(): void {
 
   socket.onmessage = (event) => {
     try {
-      const message: WebSocketMessage<any> = JSON.parse(event.data);
+      const message: WebSocketMessage<unknown> = JSON.parse(event.data);
       console.log('Received message:', message);
 
       switch (message.type) {
         case 'game_state_update':
           useGameStore.getState().setGameState(message.payload as GameState);
           break;
-        case 'player_joined': // Assuming backend sends this custom message
+        case 'player_joined': {
           const player = message.payload as Player;
           playerId = player.id;
           useGameStore.getState().setPlayerId(player.id);
           break;
+        }
         case 'error':
-          console.error('Server error:', message.payload.message);
+          console.error('Server error:', (message.payload as { message: string }).message);
           break;
         default:
           console.warn('Unhandled message type:', message.type);

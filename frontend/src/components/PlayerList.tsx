@@ -1,12 +1,13 @@
 // src/components/PlayerList.tsx
 import { useGameStore } from '@/store/gameStore';
+import type { Player } from '../../../common/types/game';
 
 export function PlayerList() {
-  const { players, activePlayerId } = useGameStore((state: any) => state.gameState);
-  const myPlayerId = useGameStore((state: any) => state.playerId);
+  const { players, activePlayerId } = useGameStore((state) => state.gameState);
+  const myPlayerId = useGameStore((state) => state.playerId);
 
   // Get player avatar from their profile data
-  const getPlayerAvatar = (player: any) => {
+  const getPlayerAvatar = (player: Player) => {
     return `/avatars/${player.avatar || 1}.jpeg`;
   };
 

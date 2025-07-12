@@ -46,7 +46,7 @@ export function PlayerList() {
               <img
                 src={avatarSrc || "/placeholder.svg"}
                 alt={`${player.name}'s avatar`}
-                className={`w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+                className={`w-16 h-16 rounded-full border-2 transition-all duration-300 ${
                   isMe ? "border-cyan-400 shadow-md shadow-cyan-400/50" : "border-slate-500"
                 }`}
                 onError={(e) => {

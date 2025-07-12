@@ -33,7 +33,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
         console.error("Error loading profile:", error)
       }
     }
-  }, [onProfileComplete])
+  }, [])
 
   const generateId = () => {
     return Math.random().toString(36).substr(2, 9)
@@ -67,7 +67,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
             <img
               src={`/avatars/${profile.avatar}.jpeg`}
               alt="Your avatar"
-              className="w-16 h-16 rounded-full border-2 border-cyan-400 shadow-lg shadow-cyan-400/25"
+              className="w-20 h-20 rounded-full border-2 border-cyan-400 shadow-lg shadow-cyan-400/25"
               onError={(e) => {
                 ;(e.target as HTMLImageElement).src = "/avatars/1.jpeg"
               }}
@@ -114,7 +114,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
             <button
               key={avatarNum}
               onClick={() => setSelectedAvatar(avatarNum)}
-              className={`w-12 h-12 rounded-full border-2 transition-all duration-300 hover:scale-110 ${
+              className={`w-14 h-14 rounded-full border-2 transition-all duration-300 hover:scale-110 ${
                 selectedAvatar === avatarNum
                   ? "border-cyan-400 ring-2 ring-cyan-400/30 shadow-lg shadow-cyan-400/25"
                   : "border-slate-500 hover:border-slate-400"

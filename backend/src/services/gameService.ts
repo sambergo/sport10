@@ -87,14 +87,44 @@ function handleTimeExpired(): void {
 
     // Check if player has exceeded inactive timeout limit
     if (activePlayer.timeoutCount >= config.inactiveTimeout) {
-        activePlayer.roundStatus = 'out';
-        console.log(`Player ${activePlayer.name} marked as out due to inactivity.`);
+        console.log(`Player ${activePlayer.name} removed from game due to inactivity.`);
+        
+        // Find the next player before removing the current one
+        const currentPlayerIndex = gameState.players.findIndex(p => p.id === activePlayer.id);
+        let nextActivePlayerId: string | null = null;
+        
+        // Look for the next active player
+        for (let i = 1; i < gameState.players.length; i++) {
+            const nextIndex = (currentPlayerIndex + i) % gameState.players.length;
+            const nextPlayer = gameState.players[nextIndex];
+            if (nextPlayer.id !== activePlayer.id && nextPlayer.roundStatus === 'in_round' && nextPlayer.connected) {
+                nextActivePlayerId = nextPlayer.id;
+                break;
+            }
+        }
+        
+        // Remove the player from the game entirely
+        const updatedPlayers = gameState.players.filter(p => p.id !== activePlayer.id);
+        updateGameState({ 
+            players: updatedPlayers,
+            activePlayerId: nextActivePlayerId 
+        });
+        
+        // Also remove from next game queue if present
+        nextGamePlayers = nextGamePlayers.filter(p => p.id !== activePlayer.id);
+        
+        // If no active players left, end the round
+        if (!nextActivePlayerId) {
+            endRound();
+        } else {
+            startTurnTimer();
+            broadcastGameState();
+        }
     } else {
         activePlayer.roundStatus = 'passed';
         console.log(`Player ${activePlayer.name} passed due to timeout.`);
+        advanceTurn();
     }
-
-    advanceTurn();
 }
 
 // ============================================================================

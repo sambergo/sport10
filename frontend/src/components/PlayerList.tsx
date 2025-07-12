@@ -1,4 +1,3 @@
-
 import { useGameStore } from "@/store/gameStore"
 import type { Player } from "@/types/game"
 import { Crown, Zap, User } from "lucide-react"
@@ -30,13 +29,12 @@ export function PlayerList() {
         return (
           <div
             key={player.id}
-            className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 ${
-              isActivePlayer
+            className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 ${isActivePlayer
                 ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 shadow-lg shadow-green-500/25"
                 : isMe
                   ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400/50 shadow-lg shadow-cyan-500/25"
                   : "bg-slate-700/30 border-slate-600/50 hover:bg-slate-700/50"
-            }`}
+              }`}
           >
             {/* Rank */}
             <div className="flex-shrink-0 w-8 flex justify-center">{getRankIcon(index)}</div>
@@ -46,11 +44,10 @@ export function PlayerList() {
               <img
                 src={avatarSrc || "/placeholder.svg"}
                 alt={`${player.name}'s avatar`}
-                className={`w-16 h-16 rounded-full border-2 transition-all duration-300 ${
-                  isMe ? "border-cyan-400 shadow-md shadow-cyan-400/50" : "border-slate-500"
-                }`}
+                className={`w-16 h-16 rounded-full border-2 transition-all duration-300 ${isMe ? "border-cyan-400 shadow-md shadow-cyan-400/50" : "border-slate-500"
+                  }`}
                 onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = "/avatars/1.png"
+                  ; (e.target as HTMLImageElement).src = "/avatars/1.png"
                 }}
               />
               {isActivePlayer && (

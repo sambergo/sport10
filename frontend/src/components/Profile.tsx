@@ -59,7 +59,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
 
   const avatarNumbers = Array.from({ length: 48 }, (_, i) => i + 1)
 
-  if (profile && !disabled) {
+  if (profile) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/50">

@@ -10,6 +10,7 @@ export function FinishedView() {
   const { playerId, config, fetchConfig } = useGameStore((state) => state)
   const winner = players.sort((a: Player, b: Player) => b.score - a.score)[0]
   const [timeLeft, setTimeLeft] = useState(60)
+  const [hasJoined, setHasJoined] = useState(false)
   const currentPlayer = players.find((p: Player) => p.id === playerId)
 
   useEffect(() => {
@@ -40,7 +41,8 @@ export function FinishedView() {
   }, [config])
 
   const handleAutoJoinNext = () => {
-    if (currentPlayer) {
+    if (currentPlayer && !hasJoined) {
+      setHasJoined(true)
       socketService.joinGame({
         id: currentPlayer.id,
         name: currentPlayer.name,
@@ -52,9 +54,9 @@ export function FinishedView() {
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
 
   return (
-    <div className="min-h-screen p-4 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 p-4 flex flex-col">
       {/* Header */}
-      <div className="text-center mb-8 pt-8">
+      <div className="text-center mb-12 pt-12">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center animate-pulse">
             <Trophy className="w-8 h-8 text-white" />
@@ -64,14 +66,24 @@ export function FinishedView() {
           GAME OVER!
         </h1>
         {winner && (
-          <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-xl rounded-2xl border border-yellow-400/50 p-6 mb-6 shadow-xl shadow-yellow-500/25">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <Crown className="w-8 h-8 text-yellow-400" />
-              <div>
+          <div className="max-w-lg mx-auto bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-xl rounded-3xl border border-yellow-400/40 p-8 mb-8 shadow-2xl shadow-yellow-500/20">
+            <div className="flex flex-col items-center justify-center mb-4">
+              <div className="flex items-center gap-4 mb-4">
+                <Crown className="w-8 h-8 text-yellow-400" />
                 <h2 className="text-2xl font-bold text-white">Champion!</h2>
-                <p className="text-yellow-400 font-bold text-xl">{winner.name}</p>
+                <Crown className="w-8 h-8 text-yellow-400" />
               </div>
-              <Crown className="w-8 h-8 text-yellow-400" />
+              
+              <img
+                src={`/avatars/${winner.avatar || 1}.png`}
+                alt={`${winner.name}'s avatar`}
+                className="w-24 h-24 rounded-full border-4 border-yellow-400 mb-4 shadow-lg shadow-yellow-500/25"
+                onError={(e) => {
+                  ;(e.target as HTMLImageElement).src = "/avatars/1.png"
+                }}
+              />
+              
+              <p className="text-yellow-400 font-bold text-xl">{winner.name}</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-black text-white mb-1">{winner.score}</div>
@@ -82,14 +94,16 @@ export function FinishedView() {
       </div>
 
       {/* Final Scoreboard */}
-      <div className="flex-1 max-w-4xl mx-auto w-full mb-8">
-        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl">
-          <div className="flex items-center gap-2 mb-6">
-            <Medal className="w-6 h-6 text-purple-400" />
-            <h2 className="text-xl font-bold text-white">Final Rankings</h2>
+      <div className="flex-1 max-w-lg mx-auto w-full mb-8">
+        <div className="bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-slate-600/30 p-6 shadow-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <Medal className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Final Rankings</h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {sortedPlayers.map((player, index) => {
               const isMe = player.id === playerId
               const getRankIcon = () => {
@@ -102,11 +116,11 @@ export function FinishedView() {
               return (
                 <div
                   key={player.id}
-                  className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 ${index === 0
-                    ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/50 shadow-lg shadow-yellow-500/25"
+                  className={`flex items-center gap-4 p-5 rounded-2xl border transition-all duration-300 ${index === 0
+                    ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/40 shadow-lg shadow-yellow-500/20"
                     : isMe
-                      ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400/50 shadow-lg shadow-cyan-500/25"
-                      : "bg-slate-700/30 border-slate-600/50"
+                      ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400/40 shadow-lg shadow-cyan-500/20"
+                      : "bg-slate-800/50 border-slate-600/30"
                     }`}
                 >
                   <div className="flex-shrink-0 w-10 flex justify-center">{getRankIcon()}</div>
@@ -154,25 +168,31 @@ export function FinishedView() {
       </div>
 
       {/* Next Game Section */}
-      <div className="max-w-md mx-auto w-full">
-        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-purple-400" />
-            <h3 className="text-lg font-bold text-white">Next Game</h3>
+      <div className="max-w-lg mx-auto w-full mb-8">
+        <div className="bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-slate-600/30 p-6 shadow-2xl text-center">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-white">Next Game</h3>
           </div>
 
           <div className="mb-6">
             <div className="text-4xl font-black text-white mb-2">{timeLeft}s</div>
-            <div className="text-sm text-slate-400">Starting automatically</div>
+            <div className="text-slate-400">Starting automatically</div>
           </div>
 
           <Button
             onClick={handleAutoJoinNext}
-            disabled={!currentPlayer?.name}
-            className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-purple-500/25"
+            disabled={!currentPlayer?.name || hasJoined}
+            className={`w-full h-12 font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl rounded-2xl ${
+              hasJoined 
+                ? "bg-green-600 text-white cursor-not-allowed"
+                : "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white hover:shadow-purple-500/30"
+            }`}
           >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Join Next Game
+            <RefreshCw className="w-5 h-5 mr-2" />
+            {hasJoined ? "Joined!" : "Join Next Game"}
           </Button>
         </div>
       </div>

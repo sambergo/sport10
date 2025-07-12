@@ -4,13 +4,45 @@ import { useGameStore } from '@/store/gameStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { socketService } from '@/services/socketService';
+import { useState, useEffect } from 'react';
 
 export function FinishedView() {
   const { players } = useGameStore((state: any) => state.gameState);
   const playerId = useGameStore((state) => state.playerId);
   const winner = players.sort((a: any, b: any) => b.score - a.score)[0];
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [gameRestartDelay, setGameRestartDelay] = useState(60);
 
   const currentPlayer = players.find((p: any) => p.id === playerId);
+
+  useEffect(() => {
+    // Fetch config from backend
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(config => {
+        setGameRestartDelay(config.gameRestartDelaySeconds);
+        setTimeLeft(config.gameRestartDelaySeconds);
+      })
+      .catch(err => {
+        console.warn('Failed to fetch config, using default:', err);
+        setGameRestartDelay(60);
+        setTimeLeft(60);
+      });
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameRestartDelay]);
 
   const handleAutoJoinNext = () => {
     if (currentPlayer) {
@@ -35,7 +67,11 @@ export function FinishedView() {
             </p>
           )}
           <Scoreboard />
-          <div className="mt-6">
+          <div className="mt-6 space-y-4">
+            <div className="text-center">
+              <p className="text-lg font-medium">Next game starts in:</p>
+              <p className="text-3xl font-bold text-primary">{timeLeft}s</p>
+            </div>
             <Button
               onClick={handleAutoJoinNext}
               disabled={!currentPlayer?.name}

@@ -446,7 +446,7 @@ function endGame(reason: string) {
         if (gameState.players.length >= 1) {
             setTimeout(() => autoStartGame(), 2000);
         }
-    }, 60000); // 60 seconds = 1 minute
+    }, config.gameRestartDelaySeconds * 1000);
 }
 
 // Removed selectNewQuestion: Now handled directly in startNewRound via getRandomQuestion

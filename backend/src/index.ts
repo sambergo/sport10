@@ -3,8 +3,10 @@ import http from 'http';
 import path from 'path';
 import { initWebSocketServer } from './websocket';
 import { initDatabase } from './database'; // New import
+import apiRoutes from './routes/api';
 
 const app = express();
+app.use(express.json());
 const server = http.createServer(app);
 
 // Initialize the database before starting the server
@@ -17,8 +19,8 @@ initDatabase().then(() => {
   // Serve static files from frontend build
   app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
-  // API routes can be added here with /api prefix
-  // app.use('/api', apiRoutes);
+  // API routes
+  app.use('/api', apiRoutes);
 
   // Serve the React app for all other routes (SPA routing)
   app.use((req: Request, res: Response) => {

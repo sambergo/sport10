@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { User, Edit3, Save } from "lucide-react"
@@ -18,6 +18,11 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
   const [name, setName] = useState("")
   const [selectedAvatar, setSelectedAvatar] = useState(1)
   const [profile, setProfile] = useState<ProfileData | null>(null)
+  const onProfileCompleteRef = useRef(onProfileComplete)
+
+  useEffect(() => {
+    onProfileCompleteRef.current = onProfileComplete
+  })
 
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile")
@@ -27,7 +32,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
         setProfile(parsedProfile)
         setName(parsedProfile.name)
         setSelectedAvatar(parsedProfile.avatar)
-        onProfileComplete(parsedProfile)
+        onProfileCompleteRef.current(parsedProfile)
       } catch (error) {
         console.error("Error loading profile:", error)
       }

@@ -8,6 +8,6 @@ export const config = {
   inactiveTimeout: 2,
   maxRounds: 2,
   gameRestartDelaySeconds: 20,
-  autoStartDelayMs: 2000,
+  autoStartDelayMs: 8000,
   resultDisplayDelayMs: 8000,
 };

@@ -6,7 +6,7 @@ import { Profile, type ProfileData } from "@/components/Profile"
 import { socketService } from "@/services/socketService"
 import { useGameStore } from "@/store/gameStore"
 import type { Player } from "@/types/game"
-import { Sparkles, Users, Gamepad2 } from "lucide-react"
+import { Sparkles, Users } from "lucide-react"
 
 export function LobbyView() {
   const [userProfile, setUserProfile] = useState<ProfileData | null>(null)
@@ -36,9 +36,7 @@ export function LobbyView() {
       {/* Header */}
       <div className="text-center mb-8 pt-8">
         <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-xl flex items-center justify-center">
-            <Gamepad2 className="w-6 h-6 text-white" />
-          </div>
+          <img src="/logo.png" alt="Smart10 Logo" className="w-12 h-12 " />
           <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             SMART10
           </h1>

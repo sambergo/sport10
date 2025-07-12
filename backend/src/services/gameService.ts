@@ -149,7 +149,7 @@ function endRound(): void {
     const winner = playersWithUpdatedScores.find(p => p.score >= config.winScore);
     if (winner) {
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
-        gameLoopTimeout = setTimeout(() => endGame(`${winner.name} wins!`), 5000);
+        gameLoopTimeout = setTimeout(() => endGame(`${winner.name} wins!`), config.resultDisplayDelayMs);
     } else if (gameState.currentRound >= config.maxRounds) {
         // Handle max rounds reached
         const topScore = Math.max(...playersWithUpdatedScores.map(p => p.score));
@@ -158,11 +158,11 @@ function endRound(): void {
             ? `${topPlayers[0].name} wins!`
             : `Tie between ${topPlayers.map(p => p.name).join(', ')}!`;
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
-        gameLoopTimeout = setTimeout(() => endGame(`Max rounds reached! ${winnerMessage}`), 5000);
+        gameLoopTimeout = setTimeout(() => endGame(`Max rounds reached! ${winnerMessage}`), config.resultDisplayDelayMs);
     } else {
         // Continue to next round
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
-        gameLoopTimeout = setTimeout(startNewRound, 5000);
+        gameLoopTimeout = setTimeout(startNewRound, config.resultDisplayDelayMs);
     }
 }
 
@@ -322,7 +322,7 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
     // Auto-start game if this is the first or second player and game is waiting
     if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
         console.log('Auto-starting game...');
-        setTimeout(() => autoStartGame(), 2000); // 2 second delay for more players to join
+        setTimeout(() => autoStartGame(), config.autoStartDelayMs); // delay for more players to join
     }
 
     return newPlayer;
@@ -466,7 +466,7 @@ function endGame(reason: string): void {
 
         // If there are players, auto-start immediately
         if (gameState.players.length >= 1) {
-            setTimeout(() => autoStartGame(), 2000);
+            setTimeout(() => autoStartGame(), config.autoStartDelayMs);
         }
     }, config.gameRestartDelaySeconds * 1000);
 }

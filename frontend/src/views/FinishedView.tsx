@@ -7,26 +7,23 @@ import { Trophy, Crown, Medal, RefreshCw, Sparkles } from "lucide-react"
 
 export function FinishedView() {
   const { players } = useGameStore((state) => state.gameState)
-  const playerId = useGameStore((state) => state.playerId)
+  const { playerId, config, fetchConfig } = useGameStore((state) => state)
   const winner = players.sort((a: Player, b: Player) => b.score - a.score)[0]
   const [timeLeft, setTimeLeft] = useState(60)
-  const [gameRestartDelay, setGameRestartDelay] = useState(60)
   const currentPlayer = players.find((p: Player) => p.id === playerId)
 
   useEffect(() => {
-    fetch("/api/config")
-      .then((res) => res.json())
-      .then((config) => {
-        const timer = config.gameRestartDelaySeconds + (config.autoStartDelayMs / 1000)
-        setGameRestartDelay(timer)
-        setTimeLeft(timer)
-      })
-      .catch((err) => {
-        console.warn("Failed to fetch config, using default:", err)
-        setGameRestartDelay(60)
-        setTimeLeft(60)
-      })
-  }, [])
+    if (!config) {
+      fetchConfig()
+    }
+  }, [config, fetchConfig])
+
+  useEffect(() => {
+    if (config) {
+      const timer = config.gameRestartDelaySeconds * 2
+      setTimeLeft(timer)
+    }
+  }, [config])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,7 +37,7 @@ export function FinishedView() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [gameRestartDelay])
+  }, [config])
 
   const handleAutoJoinNext = () => {
     if (currentPlayer) {
@@ -106,10 +103,10 @@ export function FinishedView() {
                 <div
                   key={player.id}
                   className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 ${index === 0
-                      ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/50 shadow-lg shadow-yellow-500/25"
-                      : isMe
-                        ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400/50 shadow-lg shadow-cyan-500/25"
-                        : "bg-slate-700/30 border-slate-600/50"
+                    ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/50 shadow-lg shadow-yellow-500/25"
+                    : isMe
+                      ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400/50 shadow-lg shadow-cyan-500/25"
+                      : "bg-slate-700/30 border-slate-600/50"
                     }`}
                 >
                   <div className="flex-shrink-0 w-10 flex justify-center">{getRankIcon()}</div>

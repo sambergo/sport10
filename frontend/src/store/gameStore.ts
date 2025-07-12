@@ -24,9 +24,25 @@ const initialState: GameState = {
   activePlayerId: null,
 }
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   gameState: initialState,
   playerId: null,
+  config: null,
   setGameState: (newState) => set({ gameState: newState }),
   setPlayerId: (id) => set({ playerId: id }),
+  fetchConfig: async () => {
+    try {
+      const response = await fetch("/api/config")
+      const config = await response.json()
+      set({ config })
+    } catch (err) {
+      console.warn("Failed to fetch config, using defaults:", err)
+      set({ 
+        config: { 
+          gameRestartDelaySeconds: 60, 
+          autoStartDelayMs: 0 
+        } 
+      })
+    }
+  },
 }))

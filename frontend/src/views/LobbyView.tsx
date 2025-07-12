@@ -12,7 +12,7 @@ export function LobbyView() {
   const [userProfile, setUserProfile] = useState<ProfileData | null>(null)
   const [timer, setTimer] = useState<number>(0)
   const { players, status } = useGameStore((state) => state.gameState)
-  const { playerId } = useGameStore((state) => state)
+  const { playerId, config, fetchConfig } = useGameStore((state) => state)
   const myPlayer = players.find((p: Player) => p.id === playerId)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const prevStatusRef = useRef<string>(status)
@@ -28,10 +28,23 @@ export function LobbyView() {
   }
 
   useEffect(() => {
+    if (!config) {
+      fetchConfig()
+    }
+  }, [config, fetchConfig])
+
+  useEffect(() => {
     if (prevStatusRef.current === "Waiting" && status === "Starting") {
-      setTimer(0)
+      const startingDelay = config ? config.gameRestartDelaySeconds : 10
+      setTimer(startingDelay)
       intervalRef.current = setInterval(() => {
-        setTimer(prev => prev + 1)
+        setTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current!)
+            return 0
+          }
+          return prev - 1
+        })
       }, 1000)
     }
 
@@ -47,7 +60,7 @@ export function LobbyView() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [status])
+  }, [status, config])
 
   const getTitle = () => {
     if (status === "Waiting") {

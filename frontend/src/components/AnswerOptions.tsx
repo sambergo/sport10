@@ -19,6 +19,11 @@ export function AnswerOptions() {
   const revealedIncorrectAnswers = currentQuestion.revealedIncorrectAnswers || []
 
   const getAnswerLetter = (index: number) => String.fromCharCode(65 + index)
+  
+  const getPlayerWhoAnswered = (optionIndex: number) => {
+    const playerId = currentQuestion.playerAnswers?.[optionIndex]
+    return playerId ? players.find((p: Player) => p.id === playerId) : null
+  }
 
   return (
     <div className="w-full h-full">
@@ -36,6 +41,7 @@ export function AnswerOptions() {
           const isRevealedIncorrect = revealedIncorrectAnswers.includes(index)
           const isRevealed = isRevealedCorrect || isRevealedIncorrect
           const isDisabled = !isAnsweringPhase || !isMyTurn || isRevealed
+          const playerWhoAnswered = getPlayerWhoAnswered(index)
 
           const getButtonClass = () => {
             if (isRevealedCorrect) {
@@ -67,17 +73,17 @@ export function AnswerOptions() {
                 </div>
 
                 {/* Status indicators */}
-                {isRevealedCorrect && (
+                {isRevealedCorrect && playerWhoAnswered && (
                   <div className="flex items-center gap-1 text-green-300 mt-1">
                     <CheckCircle className="w-4 h-4" />
-                    <span className="text-xs font-bold">CORRECT!</span>
+                    <span className="text-xs font-bold">{playerWhoAnswered.name}</span>
                   </div>
                 )}
 
-                {isRevealedIncorrect && (
+                {isRevealedIncorrect && playerWhoAnswered && (
                   <div className="flex items-center gap-1 text-red-300 mt-1">
                     <XCircle className="w-4 h-4" />
-                    <span className="text-xs font-bold">WRONG</span>
+                    <span className="text-xs font-bold">{playerWhoAnswered.name}</span>
                   </div>
                 )}
               </div>

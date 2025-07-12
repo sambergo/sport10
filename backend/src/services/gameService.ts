@@ -190,6 +190,7 @@ async function startNewRound(): Promise<void> {
         options: shuffledOptions,
         revealedIncorrectAnswers: [],
         originalToShuffledMapping: indexMapping,
+        playerAnswers: {},
     };
 
     // Reset player round status and scores
@@ -347,6 +348,9 @@ export function handleSubmitAnswer(playerId: string, answerIndex: number): boole
 
     const isCorrect = currentQuestion.options[answerIndex]?.isCorrect === true;
     player.lastAnswerCorrect = isCorrect;
+    
+    // Store which player answered this option
+    currentQuestion.playerAnswers[answerIndex] = playerId;
 
     if (isCorrect) {
         player.roundScore += 1;

@@ -7,9 +7,14 @@ import type { AnswerOption } from "@/types/game"
 import { CheckCircle, XCircle } from "lucide-react"
 
 export function ResultsView() {
-  const { currentQuestion } = useGameStore((state) => state.gameState)
+  const { currentQuestion, players } = useGameStore((state) => state.gameState)
 
   const getAnswerLetter = (index: number) => String.fromCharCode(65 + index)
+  
+  const getPlayerWhoAnswered = (optionIndex: number) => {
+    const playerId = currentQuestion?.playerAnswers?.[optionIndex]
+    return playerId ? players.find((p) => p.id === playerId) : null
+  }
 
   return (
     <div className="h-screen flex flex-col">
@@ -44,27 +49,42 @@ export function ResultsView() {
                     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
                   }`}
               >
-                {currentQuestion.options.map((option: AnswerOption, index: number) => (
-                  <div
-                    key={index}
-                    className={`min-h-[100px] flex flex-col justify-center items-center text-center transition-all duration-300 rounded-xl p-4 border-2 ${option.isCorrect
-                      ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 shadow-lg shadow-green-500/25 animate-in scale-in-95 duration-500"
-                      : "bg-gradient-to-r from-slate-700/50 to-slate-600/50 border-slate-600/50 opacity-70"
-                      }`}
-                  >
-                    <div className="flex flex-col items-center gap-3 w-full">
-                      <div className="flex items-start gap-3 w-full">
-                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                          {getAnswerLetter(index)}
+                {currentQuestion.options.map((option: AnswerOption, index: number) => {
+                  const playerWhoAnswered = getPlayerWhoAnswered(index)
+                  
+                  return (
+                    <div
+                      key={index}
+                      className={`min-h-[100px] flex flex-col justify-center items-center text-center transition-all duration-300 rounded-xl p-4 border-2 ${option.isCorrect
+                        ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 shadow-lg shadow-green-500/25 animate-in scale-in-95 duration-500"
+                        : "bg-gradient-to-r from-slate-700/50 to-slate-600/50 border-slate-600/50 opacity-70"
+                        }`}
+                    >
+                      <div className="flex flex-col items-center gap-3 w-full">
+                        <div className="flex items-start gap-3 w-full">
+                          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                            {getAnswerLetter(index)}
+                          </div>
+                          <span className="flex-1 text-sm font-medium leading-tight text-left text-white break-words">
+                            {option.text}
+                          </span>
                         </div>
-                        <span className="flex-1 text-sm font-medium leading-tight text-left text-white break-words">
-                          {option.text}
-                        </span>
-                      </div>
 
+                        {/* Player who answered indicator */}
+                        {playerWhoAnswered && (
+                          <div className={`flex items-center gap-1 mt-2 ${option.isCorrect ? 'text-green-300' : 'text-red-300'}`}>
+                            {option.isCorrect ? (
+                              <CheckCircle className="w-4 h-4" />
+                            ) : (
+                              <XCircle className="w-4 h-4" />
+                            )}
+                            <span className="text-xs font-bold">{playerWhoAnswered.name}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

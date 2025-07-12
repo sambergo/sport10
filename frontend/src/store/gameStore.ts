@@ -27,10 +27,24 @@ const initialState: GameState = {
 
 export const useGameStore = create<GameStore>((set) => ({
   gameState: initialState,
-  playerId: null,
+  playerId: (() => {
+    try {
+      return localStorage.getItem('fart10_player_id')
+    } catch {
+      return null
+    }
+  })(),
   config: null,
   setGameState: (newState) => set({ gameState: newState }),
-  setPlayerId: (id) => set({ playerId: id }),
+  setPlayerId: (id) => {
+    set({ playerId: id })
+    // Also persist in localStorage for consistency
+    if (id) {
+      localStorage.setItem('fart10_player_id', id)
+    } else {
+      localStorage.removeItem('fart10_player_id')
+    }
+  },
   fetchConfig: async () => {
     try {
       const response = await fetch("/api/config")

@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { Server } from 'http';
 import { gameState } from './game';
 import { WebSocketMessage, PlayerJoinPayload, SubmitAnswerPayload } from '@/common/types/messages';
-import { handlePlayerJoin, handleSubmitAnswer, handlePassTurn } from './services/gameService';
+import { handlePlayerJoin, handleSubmitAnswer, handlePassTurn, handlePlayerDisconnect as removePlayer } from './services/gameService';
 
 // Extend the WebSocket type to hold our player info
 interface PlayerWebSocket extends WebSocket {
@@ -31,11 +31,18 @@ export function initWebSocketServer(server: Server): void {
 
     ws.on('close', () => {
       console.log('Client disconnected');
-      // Add disconnection logic here
+      handlePlayerDisconnect(ws);
     });
 
     ws.on('error', (error) => console.error('WebSocket error:', error));
   });
+}
+
+function handlePlayerDisconnect(ws: PlayerWebSocket): void {
+  if (ws.playerId) {
+    console.log(`Player ${ws.playerName} (${ws.playerId}) disconnected`);
+    removePlayer(ws.playerId);
+  }
 }
 
 export function broadcastGameState(): void {

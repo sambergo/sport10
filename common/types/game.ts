@@ -27,6 +27,7 @@ export interface Player {
   roundStatus: 'in_round' | 'passed' | 'out';
   lastAnswerCorrect: boolean | null;
   timeoutCount: number;
+  connected: boolean; // Track if player is currently connected
   // Data for the current round
   roundAnswers: number[]; // Will store indices of answers given by player
   roundScore: number;

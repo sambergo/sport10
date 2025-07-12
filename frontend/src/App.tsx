@@ -7,7 +7,7 @@ import { ResultsView } from "@/views/ResultsView"
 import { FinishedView } from "@/views/FinishedView"
 
 export default function App() {
-  const { status } = useGameStore((state) => state.gameState)
+  const { status, players } = useGameStore((state) => state.gameState)
   const { playerId } = useGameStore((state) => state)
 
   useEffect(() => {
@@ -15,8 +15,25 @@ export default function App() {
   }, [])
 
   const renderView = () => {
-    if (!playerId) {
+    // Check if player is actually in the game (not just has a playerId)
+    const isPlayerInGame = playerId && players.some(p => p.id === playerId)
+    const isRejoining = socketService.isRejoining()
+    
+    // If player has an ID but isn't in the game, and we're not currently rejoining, show lobby
+    if (!playerId || (!isPlayerInGame && !isRejoining)) {
       return <LobbyView />
+    }
+    
+    // If we're rejoining, show loading state
+    if (isRejoining && !isPlayerInGame) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-cyan-400 font-medium">Rejoining game...</p>
+          </div>
+        </div>
+      )
     }
 
     switch (status) {

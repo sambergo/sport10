@@ -109,17 +109,22 @@ function advanceTurn(): void {
     const { players, activePlayerId } = gameState;
     const currentPlayerIndex = players.findIndex(p => p.id === activePlayerId);
 
-    // Find the next player who is still active in the round
+    // Find the next player who is still active in the round and connected
     let nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
-    while (players[nextPlayerIndex].roundStatus !== 'in_round' && nextPlayerIndex !== currentPlayerIndex) {
+    while (nextPlayerIndex !== currentPlayerIndex) {
+        const nextPlayer = players[nextPlayerIndex];
+        if (nextPlayer.roundStatus === 'in_round' && nextPlayer.connected) {
+            break;
+        }
         nextPlayerIndex = (nextPlayerIndex + 1) % players.length;
     }
 
-    // If we've cycled through all players and none are active, end the round
-    if (players[nextPlayerIndex].roundStatus !== 'in_round') {
+    const nextPlayer = players[nextPlayerIndex];
+    // If we've cycled through all players and none are active and connected, end the round
+    if (nextPlayer.roundStatus !== 'in_round' || !nextPlayer.connected) {
         endRound();
     } else {
-        updateGameState({ activePlayerId: players[nextPlayerIndex].id });
+        updateGameState({ activePlayerId: nextPlayer.id });
         startTurnTimer();
         broadcastGameState();
     }
@@ -202,8 +207,10 @@ async function startNewRound(): Promise<void> {
         lastAnswerCorrect: null,
     }));
 
-    const firstPlayerId = resetPlayers[0]?.id || null;
-    console.log(`Setting active player to: ${firstPlayerId}, resetPlayers[0]: ${JSON.stringify(resetPlayers[0])}`);
+    // Find the first connected player to be the active player
+    const firstConnectedPlayer = resetPlayers.find(p => p.connected);
+    const firstPlayerId = firstConnectedPlayer?.id || null;
+    console.log(`Setting active player to: ${firstPlayerId}, firstConnectedPlayer: ${JSON.stringify(firstConnectedPlayer)}`);
 
     updateGameState({
         status: 'Answering',
@@ -216,8 +223,11 @@ async function startNewRound(): Promise<void> {
     console.log(`Round ${gameState.currentRound} started. Active player: ${gameState.activePlayerId}, Players: ${resetPlayers.map(p => p.name).join(', ')}`);
     console.log(`All player IDs: ${resetPlayers.map(p => `${p.name}:${p.id}`).join(', ')}`);
 
-    if (resetPlayers[0]) {
+    if (firstConnectedPlayer) {
         startTurnTimer();
+    } else {
+        // No connected players, end the game
+        endGame('No connected players to start round');
     }
     broadcastGameState();
 }
@@ -242,7 +252,8 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
     }
 
     // Check for duplicate names or IDs
-    const existingPlayer = gameState.players.find(p => p.name === profileData.name || p.id === profileData.id);
+    const existingPlayerByName = gameState.players.find(p => p.name === profileData.name);
+    const existingPlayerById = gameState.players.find(p => p.id === profileData.id);
 
     // Special handling for "Finished" status - allow queuing for next game
     if (gameState.status === 'Finished') {
@@ -251,8 +262,8 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
 
         if (alreadyQueued) {
             console.log(`Player ${profileData.name} already queued for next game`);
-            if (existingPlayer) {
-                return existingPlayer;
+            if (existingPlayerByName || existingPlayerById) {
+                return existingPlayerByName || existingPlayerById || null;
             } else {
                 // Convert queued profile to Player object
                 const tempPlayer: Player = {
@@ -263,6 +274,7 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
                     roundStatus: 'in_round',
                     lastAnswerCorrect: null,
                     timeoutCount: 0,
+                    connected: true,
                     roundAnswers: [],
                     roundScore: 0,
                 };
@@ -274,8 +286,8 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
         nextGamePlayers.push(profileData);
         console.log(`Player ${profileData.name} queued for next game. Queue: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
 
-        if (existingPlayer) {
-            return existingPlayer;
+        if (existingPlayerByName || existingPlayerById) {
+            return existingPlayerByName || existingPlayerById || null;
         } else {
             // Create a temporary player object for new players
             const tempPlayer: Player = {
@@ -286,6 +298,7 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
                 roundStatus: 'in_round',
                 lastAnswerCorrect: null,
                 timeoutCount: 0,
+                connected: true,
                 roundAnswers: [],
                 roundScore: 0,
             };
@@ -298,9 +311,25 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
         return null;
     }
 
-    if (existingPlayer) {
-        console.log(`Join failed: player with name ${profileData.name} or ID ${profileData.id} already exists`);
+    // Check for name conflicts (different ID but same name) - these should be rejected
+    if (existingPlayerByName && existingPlayerByName.id !== profileData.id) {
+        console.log(`Join failed: player with name ${profileData.name} already exists with different ID`);
         return null;
+    }
+    
+    // If player with same ID exists, allow them to "reconnect" by marking them as connected
+    if (existingPlayerById) {
+        console.log(`Player ${profileData.name} (${profileData.id}) reconnecting to existing game slot`);
+        
+        // Mark the player as reconnected
+        const updatedPlayers = gameState.players.map(p => 
+            p.id === profileData.id ? { ...p, connected: true } : p
+        );
+        updateGameState({ players: updatedPlayers });
+        broadcastGameState();
+        
+        // Return the updated player object
+        return updatedPlayers.find(p => p.id === profileData.id) || null;
     }
 
     const newPlayer: Player = {
@@ -311,6 +340,7 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
         roundStatus: gameState.status === 'Answering' ? 'in_round' : 'in_round',
         lastAnswerCorrect: null,
         timeoutCount: 0,
+        connected: true,
         roundAnswers: [],
         roundScore: 0,
     };
@@ -399,6 +429,64 @@ export function handlePassTurn(playerId: string): boolean {
     return true;
 }
 
+/**
+ * Handles a player disconnecting from the game
+ * Removes the player from the game state and handles game flow
+ * @param playerId - ID of the player who disconnected
+ */
+export function handlePlayerDisconnect(playerId: string): void {
+    const player = gameState.players.find(p => p.id === playerId);
+    if (!player) {
+        console.log(`Player ${playerId} not found in game state`);
+        return;
+    }
+
+    console.log(`Marking player ${player.name} (${playerId}) as disconnected`);
+
+    // Mark player as disconnected instead of removing
+    const updatedPlayers = gameState.players.map(p => 
+        p.id === playerId ? { ...p, connected: false } : p
+    );
+    updateGameState({ players: updatedPlayers });
+
+    // If this was the active player and we're in answering mode, advance turn
+    if (gameState.status === 'Answering' && gameState.activePlayerId === playerId) {
+        console.log('Active player disconnected, advancing turn');
+        clearTurnTimer();
+        
+        // Find next connected active player
+        const connectedActivePlayers = updatedPlayers.filter(p => p.connected && p.roundStatus === 'in_round');
+        if (connectedActivePlayers.length > 0) {
+            // Find next player in turn order
+            const currentPlayerIndex = updatedPlayers.findIndex(p => p.id === playerId);
+            let nextPlayerIndex = (currentPlayerIndex + 1) % updatedPlayers.length;
+            
+            while (updatedPlayers[nextPlayerIndex].id !== playerId) {
+                const nextPlayer = updatedPlayers[nextPlayerIndex];
+                if (nextPlayer.connected && nextPlayer.roundStatus === 'in_round') {
+                    updateGameState({ activePlayerId: nextPlayer.id });
+                    startTurnTimer();
+                    break;
+                }
+                nextPlayerIndex = (nextPlayerIndex + 1) % updatedPlayers.length;
+            }
+            
+            // If we couldn't find a connected player, end the round
+            if (gameState.activePlayerId === playerId) {
+                endRound();
+            }
+        } else {
+            // No connected active players left, end round
+            endRound();
+        }
+    }
+
+    // Remove from next game queue if present
+    nextGamePlayers = nextGamePlayers.filter(p => p.id !== playerId);
+
+    broadcastGameState();
+}
+
 
 // ============================================================================
 // GAME AUTO-MANAGEMENT
@@ -455,6 +543,7 @@ function endGame(reason: string): void {
             roundStatus: 'in_round' as const,
             lastAnswerCorrect: null,
             timeoutCount: 0,
+            connected: true,
             roundAnswers: [],
             roundScore: 0,
         }));

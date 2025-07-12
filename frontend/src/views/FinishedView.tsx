@@ -13,8 +13,12 @@ export function FinishedView() {
   const currentPlayer = players.find((p: any) => p.id === playerId);
 
   const handleAutoJoinNext = () => {
-    if (currentPlayer?.name) {
-      socketService.joinGame(currentPlayer.name);
+    if (currentPlayer) {
+      socketService.joinGame({
+        id: currentPlayer.id,
+        name: currentPlayer.name,
+        avatar: currentPlayer.avatar
+      });
     }
   };
 

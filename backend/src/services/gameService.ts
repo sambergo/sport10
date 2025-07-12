@@ -211,20 +211,49 @@ async function startNewRound() { // Made async to await DB fetch
 export function handlePlayerJoin(profileData: { id: string; name: string; avatar: number }): Player | null {
     console.log(`Attempting to join: ${profileData.name} (ID: ${profileData.id}), current players: ${gameState.players.length}, limit: ${config.playerLimit}, status: ${gameState.status}`);
     
+    // Validate profile data
+    if (!profileData.id || !profileData.name || profileData.avatar === undefined) {
+        console.log('Join failed: Invalid profile data - missing id, name, or avatar');
+        return null;
+    }
+    
     // Check for duplicate names or IDs
     const existingPlayer = gameState.players.find(p => p.name === profileData.name || p.id === profileData.id);
     
     // Special handling for "Finished" status - allow queuing for next game
     if (gameState.status === 'Finished') {
-        if (existingPlayer && !nextGamePlayers.find(p => p.name === profileData.name)) {
-            nextGamePlayers.push(profileData);
-            console.log(`Player ${profileData.name} queued for next game. Queue: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
+        // Check if player is already queued
+        const alreadyQueued = nextGamePlayers.find(p => p.name === profileData.name || p.id === profileData.id);
+        
+        if (alreadyQueued) {
+            console.log(`Player ${profileData.name} already queued for next game`);
+            if (existingPlayer) {
+                return existingPlayer;
+            } else {
+                // Convert queued profile to Player object
+                const tempPlayer: Player = {
+                    id: alreadyQueued.id,
+                    name: alreadyQueued.name,
+                    avatar: alreadyQueued.avatar,
+                    score: 0,
+                    roundStatus: 'in_round',
+                    lastAnswerCorrect: null,
+                    timeoutCount: 0,
+                    roundAnswers: [],
+                    roundScore: 0,
+                };
+                return tempPlayer;
+            }
+        }
+        
+        // Add to queue
+        nextGamePlayers.push(profileData);
+        console.log(`Player ${profileData.name} queued for next game. Queue: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
+        
+        if (existingPlayer) {
             return existingPlayer;
-        } else if (!existingPlayer) {
-            // New player wanting to join next game
-            nextGamePlayers.push(profileData);
-            console.log(`New player ${profileData.name} queued for next game. Queue: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
-            // Create a temporary player object for the frontend
+        } else {
+            // Create a temporary player object for new players
             const tempPlayer: Player = {
                 id: profileData.id,
                 name: profileData.name,
@@ -238,7 +267,6 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
             };
             return tempPlayer;
         }
-        return existingPlayer; // Already queued
     }
     
     if (gameState.players.length >= config.playerLimit) {

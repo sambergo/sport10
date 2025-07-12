@@ -1,4 +1,4 @@
-import { GameState, GameStatus, Player } from '@/common/types/game';
+import { GameState } from '@/common/types/game';
 
 // The single, in-memory game state object (Singleton)
 export let gameState: GameState = {
@@ -45,5 +45,5 @@ export function startGame(): void {
  * @param newState Partial<GameState>
  */
 export function updateGameState(newState: Partial<GameState>): void {
-    gameState = { ...gameState, ...newState };
+  gameState = { ...gameState, ...newState };
 }

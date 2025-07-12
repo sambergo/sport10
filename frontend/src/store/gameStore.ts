@@ -4,6 +4,7 @@ import type { GameState } from "@/types/game"
 interface GameConfig {
   gameRestartDelaySeconds: number
   autoStartDelayMs: number
+  playerLimit: number
 }
 
 interface GameStore {
@@ -40,7 +41,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ 
         config: { 
           gameRestartDelaySeconds: 60, 
-          autoStartDelayMs: 0 
+          autoStartDelayMs: 0,
+          playerLimit: 8
         } 
       })
     }

@@ -44,25 +44,24 @@ export function broadcastGameState(): void {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) client.send(message);
   });
-  console.log('Broadcasted game state to all clients.');
 }
 
 export function broadcastPlayerUpdates(newPlayers: any[]): void {
   if (!wss) return;
-  
+
   wss.clients.forEach((client: PlayerWebSocket) => {
     if (client.readyState === WebSocket.OPEN && client.playerName) {
       // Find the new player object that matches this client's player name
       const matchingNewPlayer = newPlayers.find(p => p.name === client.playerName);
-      
+
       if (matchingNewPlayer) {
         const oldPlayerId = client.playerId;
         // Update the WebSocket's player ID association
         client.playerId = matchingNewPlayer.id;
         // Send the updated player info to this client
-        client.send(JSON.stringify({ 
-          type: 'player_joined', 
-          payload: matchingNewPlayer 
+        client.send(JSON.stringify({
+          type: 'player_joined',
+          payload: matchingNewPlayer
         }));
         console.log(`Updated client connection: ${matchingNewPlayer.name} from ${oldPlayerId} to ${matchingNewPlayer.id}`);
       }

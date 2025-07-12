@@ -14,6 +14,9 @@ export function LobbyView() {
   const { players, status } = useGameStore((state) => state.gameState)
   const { playerId, config, fetchConfig } = useGameStore((state) => state)
   const myPlayer = players.find((p: Player) => p.id === playerId)
+  
+  // Debug logging
+  console.log('Debug - playerId:', playerId, 'players:', players, 'myPlayer:', myPlayer)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const prevStatusRef = useRef<string>(status)
 
@@ -111,17 +114,15 @@ export function LobbyView() {
                 <Button
                   onClick={handleJoinGame}
                   className="w-full h-14 text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                  disabled={!!myPlayer || status === "Starting"}
+                  disabled={!!myPlayer || (config ? players.length >= config.playerLimit : false)}
                 >
                   {myPlayer ? (
                     <span className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                       Joined Game!
                     </span>
-                  ) : status === "Waiting" ? (
+                  ) : status === "Waiting" || status === "Starting" ? (
                     "Join Game"
-                  ) : status === "Starting" ? (
-                    "Game Starting..."
                   ) : (
                     "Join Current Game"
                   )}

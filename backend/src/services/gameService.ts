@@ -1,31 +1,18 @@
-// src/services/gameService.ts
+/**
+ * Game Service - Core game logic and state management
+ * Handles player actions, game flow, and round management
+ */
+
 import { gameState, updateGameState, resetGame as resetGameState } from '../game';
-import { Player, GameStatus, Question, QuestionTemplate } from '@/common/types/game';
+import { Player, Question } from '@/common/types/game';
 import { broadcastGameState, broadcastPlayerUpdates } from '../websocket';
 import { config } from '../config';
-// import { dummyQuestions } from '../data/questions'; // Removed: No longer needed
-import { getRandomQuestion } from '../database'; // New import
-import { v4 as uuidv4 } from 'uuid';
+import { getRandomQuestion } from '../database';
+import { shuffleArray, createIndexMapping } from '../utils/arrayUtils';
 
-// Fisher-Yates shuffle algorithm to randomize array order
-function shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-}
-
-// Create mapping from original indices to shuffled indices
-function createIndexMapping(originalLength: number, shuffledArray: any[], originalArray: any[]): number[] {
-    const mapping: number[] = [];
-    for (let i = 0; i < shuffledArray.length; i++) {
-        const originalIndex = originalArray.findIndex(item => item === shuffledArray[i]);
-        mapping[originalIndex] = i;
-    }
-    return mapping;
-}
+// ============================================================================
+// GAME STATE VARIABLES
+// ============================================================================
 
 let gameLoopTimeout: NodeJS.Timeout | null = null;
 let turnTimer: NodeJS.Timeout | null = null;
@@ -34,33 +21,42 @@ let timerInterval: NodeJS.Timeout | null = null;
 // Track players who want to rejoin the next game
 let nextGamePlayers: { id: string; name: string; avatar: number }[] = [];
 
-// --- Timer Management ---
+// ============================================================================
+// TIMER MANAGEMENT
+// ============================================================================
 
-function startTurnTimer() {
+/**
+ * Starts the turn timer for the active player
+ * Sets up both a countdown interval and timeout handler
+ */
+function startTurnTimer(): void {
     clearTurnTimer();
-    
-    // Set timer to config value
+
+    // Initialize timer to config value
     updateGameState({ timer: config.timeLimitSeconds });
     broadcastGameState();
-    
-    // Start countdown interval
+
+    // Start countdown interval (updates every second)
     timerInterval = setInterval(() => {
-        const newTimer = gameState.timer - 1;
-        updateGameState({ timer: newTimer });
+        const remainingTime = gameState.timer - 1;
+        updateGameState({ timer: remainingTime });
         broadcastGameState();
-        
-        if (newTimer <= 0) {
+
+        if (remainingTime <= 0) {
             handleTimeExpired();
         }
     }, 1000);
-    
+
     // Set timeout for when time expires
     turnTimer = setTimeout(() => {
         handleTimeExpired();
     }, config.timeLimitSeconds * 1000);
 }
 
-function clearTurnTimer() {
+/**
+ * Clears all active timers (turn timeout and countdown interval)
+ */
+function clearTurnTimer(): void {
     if (turnTimer) {
         clearTimeout(turnTimer);
         turnTimer = null;
@@ -71,45 +67,55 @@ function clearTurnTimer() {
     }
 }
 
-function handleTimeExpired() {
+/**
+ * Handles when a player's turn timer expires
+ * Increments timeout count and may mark player as out if they exceed the limit
+ */
+function handleTimeExpired(): void {
     clearTurnTimer();
-    
+
     if (gameState.status !== 'Answering' || !gameState.activePlayerId) {
         return;
     }
-    
-    const player = gameState.players.find(p => p.id === gameState.activePlayerId);
-    if (!player) return;
-    
-    // Increment timeout count
-    player.timeoutCount++;
-    console.log(`Player ${player.name} timed out. Timeout count: ${player.timeoutCount}`);
-    
-    // If player has exceeded inactive timeout limit, mark them as out
-    if (player.timeoutCount >= config.inactiveTimeout) {
-        player.roundStatus = 'out';
-        console.log(`Player ${player.name} marked as out due to inactivity.`);
+
+    const activePlayer = gameState.players.find(p => p.id === gameState.activePlayerId);
+    if (!activePlayer) return;
+
+    // Increment timeout count for tracking inactivity
+    activePlayer.timeoutCount++;
+    console.log(`Player ${activePlayer.name} timed out. Timeout count: ${activePlayer.timeoutCount}`);
+
+    // Check if player has exceeded inactive timeout limit
+    if (activePlayer.timeoutCount >= config.inactiveTimeout) {
+        activePlayer.roundStatus = 'out';
+        console.log(`Player ${activePlayer.name} marked as out due to inactivity.`);
     } else {
-        player.roundStatus = 'passed';
-        console.log(`Player ${player.name} passed due to timeout.`);
+        activePlayer.roundStatus = 'passed';
+        console.log(`Player ${activePlayer.name} passed due to timeout.`);
     }
-    
+
     advanceTurn();
 }
 
-// --- Turn & Round Management ---
+// ============================================================================
+// TURN & ROUND MANAGEMENT
+// ============================================================================
 
-function advanceTurn() {
+/**
+ * Advances to the next player's turn
+ * Finds the next player still in the round, or ends the round if none remain
+ */
+function advanceTurn(): void {
     const { players, activePlayerId } = gameState;
-    const activeIndex = players.findIndex(p => p.id === activePlayerId);
+    const currentPlayerIndex = players.findIndex(p => p.id === activePlayerId);
 
-    // Find the next player who is still in the round
-    let nextPlayerIndex = (activeIndex + 1) % players.length;
-    while (players[nextPlayerIndex].roundStatus !== 'in_round' && nextPlayerIndex !== activeIndex) {
+    // Find the next player who is still active in the round
+    let nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    while (players[nextPlayerIndex].roundStatus !== 'in_round' && nextPlayerIndex !== currentPlayerIndex) {
         nextPlayerIndex = (nextPlayerIndex + 1) % players.length;
     }
 
-    // If we've looped back to the start, everyone is passed or out
+    // If we've cycled through all players and none are active, end the round
     if (players[nextPlayerIndex].roundStatus !== 'in_round') {
         endRound();
     } else {
@@ -119,44 +125,53 @@ function advanceTurn() {
     }
 }
 
-function endRound() {
+/**
+ * Ends the current round and transitions to results or next round
+ * Calculates final scores and checks for game-ending conditions
+ */
+function endRound(): void {
     if (gameState.status !== 'Answering') return;
 
     clearTurnTimer();
     console.log(`Round ${gameState.currentRound} ended. Calculating scores.`);
     const { players } = gameState;
 
-    // Update main scores from round scores
-    const updatedPlayers = players.map(player => ({
+    // Add round scores to main scores
+    const playersWithUpdatedScores = players.map(player => ({
         ...player,
         score: player.score + player.roundScore,
     }));
 
-    updateGameState({ status: 'Results', players: updatedPlayers, activePlayerId: null });
+    updateGameState({ status: 'Results', players: playersWithUpdatedScores, activePlayerId: null });
     broadcastGameState();
 
-    // Check for a winner
-    const winner = updatedPlayers.find(p => p.score >= config.winScore);
+    // Check for game-ending conditions
+    const winner = playersWithUpdatedScores.find(p => p.score >= config.winScore);
     if (winner) {
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
         gameLoopTimeout = setTimeout(() => endGame(`${winner.name} wins!`), 5000);
     } else if (gameState.currentRound >= config.maxRounds) {
-        // Game ends when max rounds reached
-        const topScore = Math.max(...updatedPlayers.map(p => p.score));
-        const winners = updatedPlayers.filter(p => p.score === topScore);
-        const winnerMessage = winners.length === 1 
-            ? `${winners[0].name} wins!` 
-            : `Tie between ${winners.map(p => p.name).join(', ')}!`;
+        // Handle max rounds reached
+        const topScore = Math.max(...playersWithUpdatedScores.map(p => p.score));
+        const topPlayers = playersWithUpdatedScores.filter(p => p.score === topScore);
+        const winnerMessage = topPlayers.length === 1
+            ? `${topPlayers[0].name} wins!`
+            : `Tie between ${topPlayers.map(p => p.name).join(', ')}!`;
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
         gameLoopTimeout = setTimeout(() => endGame(`Max rounds reached! ${winnerMessage}`), 5000);
     } else {
+        // Continue to next round
         if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
-        gameLoopTimeout = setTimeout(startNewRound, 5000); // 5s for results before next round
+        gameLoopTimeout = setTimeout(startNewRound, 5000);
     }
 }
 
-async function startNewRound() { // Made async to await DB fetch
-    const questionTemplate = await getRandomQuestion(); // Updated to fetch from DB
+/**
+ * Starts a new round with a fresh question from the database
+ * Shuffles answer options and resets player states
+ */
+async function startNewRound(): Promise<void> {
+    const questionTemplate = await getRandomQuestion();
     if (!questionTemplate) {
         endGame('No more questions!');
         return;
@@ -165,7 +180,7 @@ async function startNewRound() { // Made async to await DB fetch
     // Shuffle the answer options
     const originalOptions = questionTemplate.options;
     const shuffledOptions = shuffleArray(originalOptions);
-    
+
     // Create mapping from original indices to shuffled indices for answer validation
     const indexMapping = createIndexMapping(originalOptions.length, shuffledOptions, originalOptions);
 
@@ -206,25 +221,33 @@ async function startNewRound() { // Made async to await DB fetch
     broadcastGameState();
 }
 
-// --- Player Actions ---
+// ============================================================================
+// PLAYER ACTIONS
+// ============================================================================
 
+/**
+ * Handles a player attempting to join the game
+ * Validates player data and manages game state transitions
+ * @param profileData - Player profile information
+ * @returns The created Player object or null if join failed
+ */
 export function handlePlayerJoin(profileData: { id: string; name: string; avatar: number }): Player | null {
     console.log(`Attempting to join: ${profileData.name} (ID: ${profileData.id}), current players: ${gameState.players.length}, limit: ${config.playerLimit}, status: ${gameState.status}`);
-    
-    // Validate profile data
+
+    // Validate required profile data
     if (!profileData.id || !profileData.name || profileData.avatar === undefined) {
         console.log('Join failed: Invalid profile data - missing id, name, or avatar');
         return null;
     }
-    
+
     // Check for duplicate names or IDs
     const existingPlayer = gameState.players.find(p => p.name === profileData.name || p.id === profileData.id);
-    
+
     // Special handling for "Finished" status - allow queuing for next game
     if (gameState.status === 'Finished') {
         // Check if player is already queued
         const alreadyQueued = nextGamePlayers.find(p => p.name === profileData.name || p.id === profileData.id);
-        
+
         if (alreadyQueued) {
             console.log(`Player ${profileData.name} already queued for next game`);
             if (existingPlayer) {
@@ -245,11 +268,11 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
                 return tempPlayer;
             }
         }
-        
+
         // Add to queue
         nextGamePlayers.push(profileData);
         console.log(`Player ${profileData.name} queued for next game. Queue: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
-        
+
         if (existingPlayer) {
             return existingPlayer;
         } else {
@@ -268,7 +291,7 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
             return tempPlayer;
         }
     }
-    
+
     if (gameState.players.length >= config.playerLimit) {
         console.log('Join failed: player limit reached');
         return null;
@@ -294,28 +317,35 @@ export function handlePlayerJoin(profileData: { id: string; name: string; avatar
     updateGameState({ players: [...gameState.players, newPlayer] });
     broadcastGameState();
     console.log(`Player ${profileData.name} joined the game successfully. New player count: ${gameState.players.length}`);
-    
+
     // Auto-start game if this is the first or second player and game is waiting
     if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
         console.log('Auto-starting game...');
         setTimeout(() => autoStartGame(), 2000); // 2 second delay for more players to join
     }
-    
+
     return newPlayer;
 }
 
+/**
+ * Handles a player submitting an answer
+ * Validates the answer and updates game state accordingly
+ * @param playerId - ID of the player submitting the answer
+ * @param answerIndex - Index of the selected answer option
+ * @returns true if answer was processed successfully
+ */
 export function handleSubmitAnswer(playerId: string, answerIndex: number): boolean {
     if (gameState.status !== 'Answering' || gameState.activePlayerId !== playerId) {
         return false;
     }
 
     const player = gameState.players.find(p => p.id === playerId);
-    const question = gameState.currentQuestion;
-    if (!player || !question) return false;
+    const currentQuestion = gameState.currentQuestion;
+    if (!player || !currentQuestion) return false;
 
     clearTurnTimer();
 
-    const isCorrect = question.options[answerIndex]?.isCorrect === true;
+    const isCorrect = currentQuestion.options[answerIndex]?.isCorrect === true;
     player.lastAnswerCorrect = isCorrect;
 
     if (isCorrect) {
@@ -325,15 +355,16 @@ export function handleSubmitAnswer(playerId: string, answerIndex: number): boole
     } else {
         player.roundScore = 0;
         player.roundStatus = 'out';
-        question.revealedIncorrectAnswers.push(answerIndex);
+        currentQuestion.revealedIncorrectAnswers.push(answerIndex);
         console.log(`Player ${player.name} answered incorrectly and is out of the round.`);
     }
 
-    // --- Check for Round End Conditions ---
+    // Check if all answer options have been revealed
     const revealedCorrectAnswers = gameState.players.flatMap(p => p.roundAnswers);
-    const totalRevealedAnswers = revealedCorrectAnswers.length + question.revealedIncorrectAnswers.length;
-    const allOptionsRevealed = totalRevealedAnswers === question.options.length;
+    const totalRevealedAnswers = revealedCorrectAnswers.length + currentQuestion.revealedIncorrectAnswers.length;
+    const allOptionsRevealed = totalRevealedAnswers === currentQuestion.options.length;
 
+    // End round if all options revealed, otherwise continue to next player
     if (allOptionsRevealed) {
         endRound();
     } else {
@@ -343,6 +374,11 @@ export function handleSubmitAnswer(playerId: string, answerIndex: number): boole
     return true;
 }
 
+/**
+ * Handles a player choosing to pass their turn
+ * @param playerId - ID of the player passing their turn
+ * @returns true if pass was processed successfully
+ */
 export function handlePassTurn(playerId: string): boolean {
     if (gameState.status !== 'Answering' || gameState.activePlayerId !== playerId) {
         return false;
@@ -360,10 +396,15 @@ export function handlePassTurn(playerId: string): boolean {
 }
 
 
-// --- Admin Actions ---
+// ============================================================================
+// GAME AUTO-MANAGEMENT
+// ============================================================================
 
-// Auto-start game functionality
-function autoStartGame() {
+/**
+ * Automatically starts the game when conditions are met
+ * Called when players join and game is in waiting state
+ */
+function autoStartGame(): void {
     if (gameState.status === 'Waiting' && gameState.players.length >= 1) {
         console.log(`Auto-starting game with players: ${gameState.players.map(p => `${p.name}:${p.id}`).join(', ')}`);
         startNewRound();
@@ -371,50 +412,27 @@ function autoStartGame() {
     }
 }
 
-export function handleAdminStartGame(password: string): boolean {
-    if (password !== config.adminPassword) {
-        console.log('Admin action failed: Invalid password.');
-        return false;
-    }
-    if (gameState.status !== 'Waiting' || gameState.players.length < 1) {
-        console.log('Admin action failed: Game already in progress or not enough players.');
-        return false;
-    }
+// ============================================================================
+// GAME LIFECYCLE
+// ============================================================================
 
-    startNewRound();
-    console.log('Admin started the game.');
-    return true;
-}
-
-export function handleAdminResetGame(password: string): boolean {
-    if (password !== config.adminPassword) {
-        console.log('Admin action failed: Invalid password.');
-        return false;
-    }
-    if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
-    clearTurnTimer();
-    nextGamePlayers = []; // Clear the queue on manual reset
-    resetGameState();
-    broadcastGameState();
-    return true;
-}
-
-// --- Game Loop & Scoring ---
-
-function endGame(reason: string) {
+/**
+ * Ends the current game and prepares for the next one
+ * @param reason - The reason the game ended (winner message, etc.)
+ */
+function endGame(reason: string): void {
     console.log(`Game ended: ${reason}`);
     if (gameLoopTimeout) clearTimeout(gameLoopTimeout);
     clearTurnTimer();
     updateGameState({ status: 'Finished', activePlayerId: null });
     broadcastGameState();
-    
-    // Auto-restart after 1 minute
+
+    // Auto-restart 
     gameLoopTimeout = setTimeout(() => {
-        console.log('Auto-restarting game after 1 minute...');
         console.log(`Queued players for next game: [${nextGamePlayers.map(p => p.name).join(', ')}]`);
-        
+
         resetGameState();
-        
+
         // Add queued players to the new game
         const newPlayers: Player[] = nextGamePlayers.map(profile => ({
             id: profile.id,
@@ -427,26 +445,24 @@ function endGame(reason: string) {
             roundAnswers: [],
             roundScore: 0,
         }));
-        
+
         if (newPlayers.length > 0) {
             updateGameState({ players: newPlayers });
             console.log(`Added ${newPlayers.length} queued players to new game`);
             console.log(`New player IDs: ${newPlayers.map(p => `${p.name}:${p.id}`).join(', ')}`);
-            
+
             // Send updated player associations to all clients
             broadcastPlayerUpdates(newPlayers);
         }
-        
+
         // Clear the queue
         nextGamePlayers = [];
-        
+
         broadcastGameState();
-        
+
         // If there are players, auto-start immediately
         if (gameState.players.length >= 1) {
             setTimeout(() => autoStartGame(), 2000);
         }
     }, config.gameRestartDelaySeconds * 1000);
 }
-
-// Removed selectNewQuestion: Now handled directly in startNewRound via getRandomQuestion

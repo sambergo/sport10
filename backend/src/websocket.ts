@@ -1,8 +1,8 @@
 import WebSocket from 'ws';
 import { Server } from 'http';
 import { gameState } from './game';
-import { WebSocketMessage, PlayerJoinPayload, AdminActionPayload, SubmitAnswerPayload } from '@/common/types/messages';
-import { handlePlayerJoin, handleAdminStartGame, handleAdminResetGame, handleSubmitAnswer, handlePassTurn } from './services/gameService';
+import { WebSocketMessage, PlayerJoinPayload, SubmitAnswerPayload } from '@/common/types/messages';
+import { handlePlayerJoin, handleSubmitAnswer, handlePassTurn } from './services/gameService';
 
 // Extend the WebSocket type to hold our player info
 interface PlayerWebSocket extends WebSocket {
@@ -94,19 +94,7 @@ function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): voi
       }
       break;
 
-    case 'admin_start_game':
-      const { password: startPassword } = message.payload as AdminActionPayload;
-      if (!handleAdminStartGame(startPassword)) {
-        ws.send(JSON.stringify({ type: 'error', payload: { message: 'Invalid password or game state.' } }));
-      }
-      break;
-
-    case 'admin_reset_game':
-        const { password: resetPassword } = message.payload as AdminActionPayload;
-        if (!handleAdminResetGame(resetPassword)) {
-          ws.send(JSON.stringify({ type: 'error', payload: { message: 'Invalid password.' } }));
-        }
-        break;
+    // Admin functions removed - game runs automatically
 
     case 'submit_answer':
       const { answerIndex } = message.payload as SubmitAnswerPayload;

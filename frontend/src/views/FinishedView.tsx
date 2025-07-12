@@ -74,14 +74,21 @@ export function FinishedView() {
                 <Crown className="w-8 h-8 text-yellow-400" />
               </div>
               
-              <img
-                src={`/avatars/${winner.avatar || 1}.png`}
-                alt={`${winner.name}'s avatar`}
-                className="w-24 h-24 rounded-full border-4 border-yellow-400 mb-4 shadow-lg shadow-yellow-500/25"
-                onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = "/avatars/1.png"
-                }}
-              />
+              <div className="relative mb-4">
+                <img
+                  src={`/avatars/${winner.avatar || 1}.png`}
+                  alt={`${winner.name}'s avatar`}
+                  className="w-40 h-40 rounded-full border-6 border-yellow-400 shadow-2xl shadow-yellow-500/40 animate-bounce"
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).src = "/avatars/1.png"
+                  }}
+                />
+                <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-ping">
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full animate-pulse"></div>
+                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full animate-pulse animation-delay-500"></div>
+              </div>
               
               <p className="text-yellow-400 font-bold text-xl">{winner.name}</p>
             </div>

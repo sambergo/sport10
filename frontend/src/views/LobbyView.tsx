@@ -36,10 +36,10 @@ export function LobbyView() {
       {/* Header */}
       <div className="text-center mb-8 pt-8">
         <div className="inline-flex items-center gap-3 mb-4">
-          <img src="/logo.png" alt="Smart10 Logo" className="w-12 h-12 " />
           <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            SMART10
+            SMART
           </h1>
+          <img src="/logo.png" alt="Smart10 Logo" className="w-12 h-12 " />
         </div>
         <p className="text-slate-400 text-lg font-medium">{getTitle()}</p>
       </div>

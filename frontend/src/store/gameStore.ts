@@ -25,7 +25,7 @@ const initialState: GameState = {
   activePlayerId: null,
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
+export const useGameStore = create<GameStore>((set) => ({
   gameState: initialState,
   playerId: null,
   config: null,

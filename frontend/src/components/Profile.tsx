@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -69,7 +68,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
               alt="Your avatar"
               className="w-20 h-20 rounded-full border-2 border-cyan-400 shadow-lg shadow-cyan-400/25"
               onError={(e) => {
-                ;(e.target as HTMLImageElement).src = "/avatars/1.png"
+                ; (e.target as HTMLImageElement).src = "/avatars/1.png"
               }}
             />
             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-slate-900 flex items-center justify-center">
@@ -114,11 +113,10 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
             <button
               key={avatarNum}
               onClick={() => setSelectedAvatar(avatarNum)}
-              className={`w-14 h-14 rounded-full border-2 transition-all duration-300 hover:scale-110 ${
-                selectedAvatar === avatarNum
-                  ? "border-cyan-400 ring-2 ring-cyan-400/30 shadow-lg shadow-cyan-400/25"
-                  : "border-slate-500 hover:border-slate-400"
-              }`}
+              className={`w-14 h-14 rounded-full border-2 transition-all duration-300 hover:scale-110 ${selectedAvatar === avatarNum
+                ? "border-cyan-400 ring-2 ring-cyan-400/30 shadow-lg shadow-cyan-400/25"
+                : "border-slate-500 hover:border-slate-400"
+                }`}
               disabled={disabled}
             >
               <img
@@ -126,7 +124,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
                 alt={`Avatar ${avatarNum}`}
                 className="w-full h-full rounded-full object-cover"
                 onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = "/avatars/1.png"
+                  ; (e.target as HTMLImageElement).src = "/avatars/1.png"
                 }}
               />
             </button>

@@ -9,8 +9,6 @@ import { CheckCircle, XCircle } from "lucide-react"
 export function ResultsView() {
   const { currentQuestion, players } = useGameStore((state) => state.gameState)
 
-  const getAnswerLetter = (index: number) => String.fromCharCode(65 + index)
-  
   const getPlayerWhoAnswered = (optionIndex: number) => {
     const playerId = currentQuestion?.playerAnswers?.[optionIndex]
     return playerId ? players.find((p) => p.id === playerId) : null
@@ -51,7 +49,7 @@ export function ResultsView() {
               >
                 {currentQuestion.options.map((option: AnswerOption, index: number) => {
                   const playerWhoAnswered = getPlayerWhoAnswered(index)
-                  
+
                   return (
                     <div
                       key={index}
@@ -62,9 +60,6 @@ export function ResultsView() {
                     >
                       <div className="flex flex-col items-center gap-3 w-full">
                         <div className="flex items-start gap-3 w-full">
-                          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                            {getAnswerLetter(index)}
-                          </div>
                           <span className="flex-1 text-sm font-medium leading-tight text-left text-white break-words">
                             {option.text}
                           </span>

@@ -31,7 +31,7 @@ export function QuestionDisplay() {
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-sm font-bold text-white leading-tight mb-1">{question.question}</h2>
-          <p className="text-xs text-slate-400">Select all correct answers!</p>
+          <p className="text-xs text-slate-400">{question.category}</p>
         </div>
       </div>
     </div>

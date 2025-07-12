@@ -18,8 +18,6 @@ export function AnswerOptions() {
   const revealedCorrectAnswers = players.flatMap((p: Player) => p.roundAnswers)
   const revealedIncorrectAnswers = currentQuestion.revealedIncorrectAnswers || []
 
-  const getAnswerLetter = (index: number) => String.fromCharCode(65 + index)
-  
   const getPlayerWhoAnswered = (optionIndex: number) => {
     const playerId = currentQuestion.playerAnswers?.[optionIndex]
     return playerId ? players.find((p: Player) => p.id === playerId) : null
@@ -30,10 +28,10 @@ export function AnswerOptions() {
       {/* Grid that adapts to number of options */}
       <div
         className={`grid gap-3 h-full ${currentQuestion.options.length <= 4
-            ? "grid-cols-1 sm:grid-cols-2"
-            : currentQuestion.options.length <= 6
-              ? "grid-cols-2 sm:grid-cols-3"
-              : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+          ? "grid-cols-1 sm:grid-cols-2"
+          : currentQuestion.options.length <= 6
+            ? "grid-cols-2 sm:grid-cols-3"
+            : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
           } animate-in fade-in duration-500`}
       >
         {currentQuestion.options.map((option: AnswerOption, index: number) => {
@@ -66,9 +64,6 @@ export function AnswerOptions() {
               <div className="flex flex-col items-center gap-2 w-full h-full justify-center">
                 {/* Answer letter and text */}
                 <div className="flex items-start gap-2 w-full">
-                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                    {getAnswerLetter(index)}
-                  </div>
                   <span className="flex-1 text-xs font-medium leading-tight text-left break-words">{option.text}</span>
                 </div>
 

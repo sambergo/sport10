@@ -5,8 +5,8 @@ export const config = {
   timeLimitSeconds: 45,
   playerLimit: 8,
   inactiveTimeout: 2,
-  maxRounds: 1,
-  gameRestartDelaySeconds: 20,
+  maxRounds: 10,
+  gameRestartDelaySeconds: 10,
   autoStartDelayMs: 8000,
   resultDisplayDelayMs: 8000,
 };

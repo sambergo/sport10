@@ -5,6 +5,7 @@ import { QuestionDisplay } from "@/components/QuestionDisplay"
 import { useGameStore } from "@/store/gameStore"
 import type { AnswerOption } from "@/types/game"
 import { CheckCircle, XCircle } from "lucide-react"
+import { getDynamicSizing } from "@/utils/answerOptionSizing"
 
 export function ResultsView() {
   const { currentQuestion, players } = useGameStore((state) => state.gameState)
@@ -37,37 +38,40 @@ export function ResultsView() {
         {/* Results content */}
         <div className="flex-1 px-4 pb-6">
           {currentQuestion && (
-            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl">
-              <h3 className="text-lg font-bold text-white mb-6 text-center">Answer Breakdown</h3>
+            <div className="w-full h-full">
               <div
-                className={`grid gap-4 ${currentQuestion.options.length <= 4
+                className={`grid gap-3 h-full ${currentQuestion.options.length <= 4
                   ? "grid-cols-1 sm:grid-cols-2"
                   : currentQuestion.options.length <= 6
                     ? "grid-cols-2 sm:grid-cols-3"
                     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-                  }`}
+                  } animate-in fade-in duration-500`}
               >
                 {currentQuestion.options.map((option: AnswerOption, index: number) => {
                   const playerWhoAnswered = getPlayerWhoAnswered(index)
+                  const dynamicSizing = getDynamicSizing(currentQuestion.options)
+
+                  const getButtonClass = () => {
+                    if (option.isCorrect) {
+                      return "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-green-400 shadow-lg shadow-green-500/25"
+                    }
+                    return "bg-gradient-to-r from-slate-700/50 to-slate-600/50 text-white border-slate-600/50 opacity-70"
+                  }
 
                   return (
                     <div
                       key={index}
-                      className={`min-h-[100px] flex flex-col justify-center items-center text-center transition-all duration-300 rounded-xl p-4 border-2 ${option.isCorrect
-                        ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 shadow-lg shadow-green-500/25 animate-in scale-in-95 duration-500"
-                        : "bg-gradient-to-r from-slate-700/50 to-slate-600/50 border-slate-600/50 opacity-70"
-                        }`}
+                      className={`${getButtonClass()} ${dynamicSizing.height} ${dynamicSizing.padding} rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center`}
                     >
-                      <div className="flex flex-col items-center gap-3 w-full">
-                        <div className="flex items-start gap-3 w-full">
-                          <span className="flex-1 text-sm font-medium leading-tight text-left text-white break-words">
-                            {option.text}
-                          </span>
+                      <div className="flex flex-col items-center gap-2 w-full h-full justify-center">
+                        {/* Answer text */}
+                        <div className="flex items-start gap-2 w-full">
+                          <span className={`flex-1 ${dynamicSizing.fontSize} font-medium leading-tight text-center break-words`}>{option.text}</span>
                         </div>
 
                         {/* Player who answered indicator */}
                         {playerWhoAnswered && (
-                          <div className={`flex items-center gap-1 mt-2 ${option.isCorrect ? 'text-green-300' : 'text-red-300'}`}>
+                          <div className={`flex items-center gap-1 mt-1 ${option.isCorrect ? 'text-green-300' : 'text-red-300'}`}>
                             {option.isCorrect ? (
                               <CheckCircle className="w-4 h-4" />
                             ) : (

@@ -3,6 +3,7 @@ import { Database as SqliteDatabase } from 'sqlite3';
 import { open } from 'sqlite';
 import { dummyQuestions } from './data/questions';
 import { QuestionTemplate } from '@/common/types/game';
+import { dbPath } from './config';
 
 // Type for the SQLite database connection (using promise-based sqlite)
 let db: Awaited<ReturnType<typeof open>>;
@@ -10,7 +11,7 @@ let db: Awaited<ReturnType<typeof open>>;
 // Initialize the database
 export async function initDatabase() {
   db = await open({
-    filename: './smart10.db', // Persistent file-based DB
+    filename: dbPath,
     driver: SqliteDatabase,
   });
 

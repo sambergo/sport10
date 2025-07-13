@@ -129,7 +129,7 @@ Make sure the JSON is valid and properly formatted. Do not include any text befo
         return None
 
 
-def add_questions_to_database(questions_data, db_path="./smart10.db"):
+def add_questions_to_database(questions_data, db_path="./sport10.db"):
     """
     Add generated questions to the SQLite database.
     """
@@ -349,4 +349,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

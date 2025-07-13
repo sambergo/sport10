@@ -10,3 +10,5 @@ export const config = {
   autoStartDelayMs: 8000,
   resultDisplayDelayMs: 8000,
 };
+
+export const dbPath = "./dbs/sport2.db";

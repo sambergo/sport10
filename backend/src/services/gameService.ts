@@ -21,6 +21,9 @@ let timerInterval: NodeJS.Timeout | null = null;
 // Track players who want to rejoin the next game
 let nextGamePlayers: { id: string; name: string; avatar: number }[] = [];
 
+// Track which player should start the round for fair rotation
+let startingPlayerIndex: number = 0;
+
 // ============================================================================
 // TIMER MANAGEMENT
 // ============================================================================
@@ -237,9 +240,26 @@ async function startNewRound(): Promise<void> {
         lastAnswerCorrect: null,
     }));
 
-    // Find the first connected player to be the active player
-    const firstConnectedPlayer = resetPlayers.find(p => p.connected);
-    const firstPlayerId = firstConnectedPlayer?.id || null;
+    // Select starting player with fair rotation
+    const connectedPlayers = resetPlayers.filter(p => p.connected);
+    let firstConnectedPlayer: Player | undefined;
+    let firstPlayerId: string | null = null;
+
+    if (connectedPlayers.length > 0) {
+        if (gameState.currentRound === 0) {
+            // First round: randomize starting player
+            startingPlayerIndex = Math.floor(Math.random() * connectedPlayers.length);
+            firstConnectedPlayer = connectedPlayers[startingPlayerIndex];
+            console.log(`First round: randomly selected starting player index ${startingPlayerIndex}`);
+        } else {
+            // Subsequent rounds: rotate to next player
+            startingPlayerIndex = (startingPlayerIndex + 1) % connectedPlayers.length;
+            firstConnectedPlayer = connectedPlayers[startingPlayerIndex];
+            console.log(`Round ${gameState.currentRound + 1}: rotated to starting player index ${startingPlayerIndex}`);
+        }
+        firstPlayerId = firstConnectedPlayer?.id || null;
+    }
+    
     console.log(`Setting active player to: ${firstPlayerId}, firstConnectedPlayer: ${JSON.stringify(firstConnectedPlayer)}`);
 
     updateGameState({
@@ -587,8 +607,9 @@ function endGame(reason: string): void {
             broadcastPlayerUpdates(newPlayers);
         }
 
-        // Clear the queue
+        // Clear the queue and reset starting player index for new game
         nextGamePlayers = [];
+        startingPlayerIndex = 0;
 
         broadcastGameState();
 

@@ -5,7 +5,7 @@
 
 import { gameState, updateGameState, resetGame as resetGameState } from '../game';
 import { Player, Question } from '@/common/types/game';
-import { broadcastGameState, broadcastPlayerUpdates } from '../websocket';
+import { broadcastGameState, broadcastPlayerUpdates, sendPlayerKickedMessage } from '../websocket';
 import { config } from '../config';
 import { getRandomQuestion } from '../database';
 import { shuffleArray, createIndexMapping } from '../utils/arrayUtils';
@@ -105,6 +105,9 @@ function handleTimeExpired(): void {
                 break;
             }
         }
+        
+        // Send kick message to the player before removing them
+        sendPlayerKickedMessage(activePlayer.id);
         
         // Remove the player from the game entirely
         const updatedPlayers = gameState.players.filter(p => p.id !== activePlayer.id);

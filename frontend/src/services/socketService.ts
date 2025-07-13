@@ -95,6 +95,14 @@ function connect(): void {
           }
           break
         }
+        case "player_kicked":
+          console.log("Player was kicked from game")
+          // Clear saved profile and player ID to prevent auto-rejoin
+          clearPlayerProfile()
+          playerId = null
+          useGameStore.getState().setPlayerId(null)
+          localStorage.removeItem('fart10_player_id')
+          break
         case "error":
           console.error("Server error:", (message.payload as { message: string }).message)
           // Clear rejoining flag on error

@@ -76,6 +76,20 @@ export function broadcastPlayerUpdates(newPlayers: any[]): void {
   });
 }
 
+export function sendPlayerKickedMessage(playerId: string): void {
+  if (!wss) return;
+  
+  wss.clients.forEach((client: PlayerWebSocket) => {
+    if (client.readyState === WebSocket.OPEN && client.playerId === playerId) {
+      client.send(JSON.stringify({
+        type: 'player_kicked',
+        payload: { reason: 'inactivity' }
+      }));
+      console.log(`Sent kick message to player ${client.playerName} (${playerId})`);
+    }
+  });
+}
+
 function handleMessage(ws: PlayerWebSocket, message: WebSocketMessage<any>): void {
   console.log(`Received message of type: ${message.type}`);
 

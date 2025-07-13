@@ -9,6 +9,50 @@ export function AnswerOptions() {
 
   if (!currentQuestion) return null
 
+  const getMaxTextLength = () => {
+    return Math.max(...currentQuestion.options.map(option => option.text.length))
+  }
+
+  const getDynamicSizing = () => {
+    const maxLength = getMaxTextLength()
+
+    // Base sizing for very short text (1-5 chars)
+    if (maxLength <= 10) {
+      return {
+        fontSize: 'text-2xl sm:text-3xl lg:text-4xl',
+        height: 'min-h-[80px] sm:min-h-[90px] lg:min-h-[100px]',
+        padding: 'p-4'
+      }
+    }
+
+    // Medium text (6-20 chars)
+    if (maxLength <= 20) {
+      return {
+        fontSize: 'text-lg sm:text-xl lg:text-2xl',
+        height: 'min-h-[70px] sm:min-h-[80px] lg:min-h-[90px]',
+        padding: 'p-3'
+      }
+    }
+
+    // Long text (21-50 chars)
+    if (maxLength <= 50) {
+      return {
+        fontSize: 'text-base sm:text-lg',
+        height: 'min-h-[60px] sm:min-h-[70px]',
+        padding: 'p-3'
+      }
+    }
+
+    // Very long text (50+ chars)
+    return {
+      fontSize: 'text-sm sm:text-base',
+      height: 'min-h-[50px] sm:min-h-[60px]',
+      padding: 'p-2'
+    }
+  }
+
+  const dynamicSizing = getDynamicSizing()
+
   const handleSelectAnswer = (index: number) => {
     socketService.submitAnswer(index)
   }
@@ -59,12 +103,12 @@ export function AnswerOptions() {
               key={index}
               onClick={() => handleSelectAnswer(index)}
               disabled={isDisabled}
-              className={`${getButtonClass()} min-h-[70px] p-3 rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center group`}
+              className={`${getButtonClass()} ${dynamicSizing.height} ${dynamicSizing.padding} rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center group`}
             >
               <div className="flex flex-col items-center gap-2 w-full h-full justify-center">
                 {/* Answer letter and text */}
                 <div className="flex items-start gap-2 w-full">
-                  <span className="flex-1 text-xs font-medium leading-tight text-left break-words">{option.text}</span>
+                  <span className={`flex-1 ${dynamicSizing.fontSize} font-medium leading-tight text-center break-words`}>{option.text}</span>
                 </div>
 
                 {/* Status indicators */}

@@ -107,7 +107,7 @@ export function LobbyView() {
                   <Sparkles className="w-5 h-5 text-cyan-400" />
                   <h2 className="text-xl font-bold text-white">Profile</h2>
                 </div>
-                <Profile onProfileComplete={handleProfileComplete} disabled={!!myPlayer} />
+                <Profile onProfileComplete={handleProfileComplete} disabled={!!myPlayer} editDisabled={!!myPlayer} />
               </div>
 
               {userProfile && (

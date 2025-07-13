@@ -12,11 +12,14 @@ export interface ProfileData {
 interface ProfileProps {
   onProfileComplete: (profile: ProfileData) => void
   disabled?: boolean
+  editDisabled?: boolean
 }
 
-export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
+export function Profile({ onProfileComplete, disabled = false, editDisabled = false }: ProfileProps) {
   const [name, setName] = useState("")
-  const [selectedAvatar, setSelectedAvatar] = useState(1)
+  const [selectedAvatar, setSelectedAvatar] = useState(() => {
+    return Math.floor(Math.random() * 48) + 1
+  })
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const onProfileCompleteRef = useRef(onProfileComplete)
 
@@ -90,6 +93,7 @@ export function Profile({ onProfileComplete, disabled = false }: ProfileProps) {
           onClick={editProfile}
           variant="outline"
           className="w-full h-12 bg-slate-700/50 border-slate-600 text-white hover:bg-slate-600/50 hover:border-slate-500"
+          disabled={editDisabled}
         >
           <Edit3 className="w-4 h-4 mr-2" />
           Edit Profile

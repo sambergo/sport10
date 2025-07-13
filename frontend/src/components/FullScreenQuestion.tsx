@@ -6,8 +6,17 @@ export function FullScreenQuestion() {
   if (!question) return null
 
   return (
-    <div className="h-screen flex items-center justify-center p-8">
-      <div className="max-w-4xl w-full text-center">
+    <div 
+      className="h-screen flex items-center justify-center p-8 relative"
+      style={{
+        backgroundImage: 'url(/background/6.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="absolute inset-0 bg-slate-900/95 pointer-events-none"></div>
+      <div className="relative z-10 max-w-4xl w-full text-center">
         <div className="mb-8">
           <p className="text-xl sm:text-2xl text-slate-400 mb-4">{question.category}</p>
         </div>

@@ -17,40 +17,62 @@ export function GameView() {
     }
 
     return (
-      <div className="h-screen flex flex-col">
-        {/* Fixed Top Bar */}
-        <GameTopBar />
+      <div 
+        className="h-screen flex flex-col relative"
+        style={{
+          backgroundImage: 'url(/background/6.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-slate-900/95 pointer-events-none"></div>
+        <div className="relative z-10 h-screen flex flex-col">
+          {/* Fixed Top Bar */}
+          <GameTopBar />
 
-        {/* Main Content Area - scrollable if needed */}
-        <div className="flex-1 flex flex-col pt-16 pb-20 overflow-auto">
-          {/* Question Section */}
-          <div className="flex-shrink-0 px-4 py-3">
-            <QuestionDisplay />
+          {/* Main Content Area - scrollable if needed */}
+          <div className="flex-1 flex flex-col pt-16 pb-20 overflow-auto">
+            {/* Question Section */}
+            <div className="flex-shrink-0 px-4 py-3">
+              <QuestionDisplay />
+            </div>
+
+            {/* Answer Section - takes remaining space */}
+            <div className="flex-1 px-4 pb-3">
+              <AnswerOptions />
+            </div>
           </div>
 
-          {/* Answer Section - takes remaining space */}
-          <div className="flex-1 px-4 pb-3">
-            <AnswerOptions />
-          </div>
+          {/* Fixed Bottom Bar */}
+          <GameActions />
         </div>
-
-        {/* Fixed Bottom Bar */}
-        <GameActions />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col gap-4 p-4 pb-24">
-      <div className="pt-8 flex-shrink-0">
-        <QuestionDisplay />
-      </div>
+    <div 
+      className="min-h-screen flex flex-col gap-4 p-4 pb-24 relative"
+      style={{
+        backgroundImage: 'url(/background/6.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="absolute inset-0 bg-slate-900/95 pointer-events-none"></div>
+      <div className="relative z-10 min-h-screen flex flex-col gap-4 p-4 pb-24">
+        <div className="pt-8 flex-shrink-0">
+          <QuestionDisplay />
+        </div>
 
-      <div className="flex-1 flex flex-col">
-        <AnswerOptions />
-      </div>
+        <div className="flex-1 flex flex-col">
+          <AnswerOptions />
+        </div>
 
-      <GameActions />
+        <GameActions />
+      </div>
     </div>
   )
 }

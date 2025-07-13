@@ -54,7 +54,17 @@ export function FinishedView() {
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 p-4 flex flex-col">
+    <div 
+      className="min-h-screen p-4 flex flex-col relative"
+      style={{
+        backgroundImage: 'url(/background/6.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="absolute inset-0 bg-slate-900/95 pointer-events-none"></div>
+      <div className="relative z-10 min-h-screen p-4 flex flex-col">
       {/* Header */}
       <div className="text-center mb-12 pt-12">
         <div className="inline-flex items-center gap-3 mb-4">
@@ -202,6 +212,7 @@ export function FinishedView() {
           </Button>
         </div>
       </div>
+    </div>
     </div>
   )
 }

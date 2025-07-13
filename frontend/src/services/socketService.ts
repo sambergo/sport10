@@ -163,4 +163,13 @@ export const socketService = {
   passTurn: () => {
     sendMessage("pass_turn", {})
   },
+  leaveGame: () => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.close()
+    }
+    clearPlayerProfile()
+    playerId = null
+    useGameStore.getState().setPlayerId(null)
+    localStorage.removeItem('fart10_player_id')
+  },
 }

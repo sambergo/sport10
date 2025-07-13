@@ -232,6 +232,7 @@ async function startNewRound(): Promise<void> {
         revealedIncorrectAnswers: [],
         originalToShuffledMapping: indexMapping,
         playerAnswers: {},
+        optionsRevealed: false,
     };
 
     // Reset player round status and scores
@@ -276,13 +277,31 @@ async function startNewRound(): Promise<void> {
     console.log(`Round ${gameState.currentRound} started. Active player: ${gameState.activePlayerId}, Players: ${resetPlayers.map(p => p.name).join(', ')}`);
     console.log(`All player IDs: ${resetPlayers.map(p => `${p.name}:${p.id}`).join(', ')}`);
 
-    if (firstConnectedPlayer) {
-        startTurnTimer();
-    } else {
+    // First broadcast the question without options
+    broadcastGameState();
+
+    // After the configured delay, reveal the options
+    setTimeout(() => {
+        if (gameState.currentQuestion && !gameState.currentQuestion.optionsRevealed) {
+            updateGameState({
+                currentQuestion: {
+                    ...gameState.currentQuestion,
+                    optionsRevealed: true
+                }
+            });
+            broadcastGameState();
+            
+            // Start the turn timer only after options are revealed
+            if (firstConnectedPlayer) {
+                startTurnTimer();
+            }
+        }
+    }, config.questionRevealDelayMs);
+
+    if (!firstConnectedPlayer) {
         // No connected players, end the game
         endGame('No connected players to start round');
     }
-    broadcastGameState();
 }
 
 // ============================================================================

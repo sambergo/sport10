@@ -17,6 +17,7 @@ export interface Question {
   options: AnswerOption[]
   revealedIncorrectAnswers?: number[]
   playerAnswers?: Record<number, string>
+  optionsRevealed?: boolean
 }
 
 export interface GameState {

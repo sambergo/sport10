@@ -9,6 +9,7 @@ export const config = {
   gameRestartDelaySeconds: 10,
   autoStartDelayMs: 8000,
   resultDisplayDelayMs: 8000,
+  questionRevealDelayMs: 5000,
 };
 
 export const dbPath = "./sport10.db";

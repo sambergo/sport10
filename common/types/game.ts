@@ -17,6 +17,7 @@ export interface Question extends QuestionTemplate {
   revealedIncorrectAnswers: number[];
   originalToShuffledMapping?: number[]; // Maps original option indices to shuffled indices
   playerAnswers: Record<number, string>; // Maps option index to player ID who chose it
+  optionsRevealed: boolean; // Whether the options have been revealed to players
 }
 
 export interface Player {

@@ -3,13 +3,19 @@ import { QuestionDisplay } from "@/components/QuestionDisplay"
 import { AnswerOptions } from "@/components/AnswerOptions"
 import { GameActions } from "@/components/GameActions"
 import { GameTopBar } from "@/components/GameTopBar"
+import { FullScreenQuestion } from "@/components/FullScreenQuestion"
 import { useGameStore } from "@/store/gameStore"
 
 export function GameView() {
-  const { status } = useGameStore((state) => state.gameState)
+  const { status, currentQuestion } = useGameStore((state) => state.gameState)
   const isGameActive = status === "Answering" || status === "Results"
 
   if (isGameActive) {
+    // Show full-screen question if options aren't revealed yet
+    if (status === "Answering" && currentQuestion && !currentQuestion.optionsRevealed) {
+      return <FullScreenQuestion />
+    }
+
     return (
       <div className="h-screen flex flex-col">
         {/* Fixed Top Bar */}

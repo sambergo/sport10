@@ -11,4 +11,4 @@ export const config = {
   resultDisplayDelayMs: 8000,
 };
 
-export const dbPath = "./dbs/sport2.db";
+export const dbPath = "./sport10.db";

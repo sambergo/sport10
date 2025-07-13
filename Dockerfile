@@ -53,7 +53,7 @@ RUN cd node_modules/.pnpm/sqlite3@5.1.7/node_modules/sqlite3 && npm run install
 # Copy built backend
 COPY --from=backend-build --chown=nodejs:nodejs /app/backend/dist ./dist
 # Copy database from source
-COPY --chown=nodejs:nodejs backend/smart10.db ./smart10.db
+COPY --chown=nodejs:nodejs backend/sport10.db ./sport10.db
 
 # Copy built frontend
 COPY --from=frontend-build --chown=nodejs:nodejs /app/dist ./dist/frontend/dist

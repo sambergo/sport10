@@ -15,7 +15,7 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - ./backend/smart10.db:/app/smart10.db
+      - ./backend/sport10.db:/app/sport10.db
     restart: unless-stopped
     networks:
       - app-network

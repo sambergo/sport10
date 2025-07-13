@@ -4,3 +4,4 @@ backend/dist
 backend/generate_questions.log
 scripts/generate_questions.log
 scripts/__pycache__
+deploy.sh

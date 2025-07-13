@@ -12,7 +12,7 @@ interface GameStore {
   playerId: string | null
   config: GameConfig | null
   setGameState: (newState: GameState) => void
-  setPlayerId: (id: string) => void
+  setPlayerId: (id: string | null) => void
   fetchConfig: () => Promise<void>
 }
 

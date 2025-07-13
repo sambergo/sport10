@@ -24,7 +24,7 @@ export function ResultsView() {
         {/* Scoreboard section */}
         <div className="flex-shrink-0 px-4 py-3">
           <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl">
-            <h2 className="text-xl font-bold text-white mb-4 text-center">Round Results</h2>
+            <h2 className="text-xl font-bold text-white mb-4 text-center">Score</h2>
             <PlayerList />
           </div>
         </div>

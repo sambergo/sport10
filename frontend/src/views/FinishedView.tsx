@@ -21,7 +21,7 @@ export function FinishedView() {
 
   useEffect(() => {
     if (config) {
-      const timer = config.gameRestartDelaySeconds * 2
+      const timer = config.gameRestartDelaySeconds
       setTimeLeft(timer)
     }
   }, [config])
@@ -73,14 +73,14 @@ export function FinishedView() {
                 <h2 className="text-2xl font-bold text-white">Champion!</h2>
                 <Crown className="w-8 h-8 text-yellow-400" />
               </div>
-              
+
               <div className="relative mb-4">
                 <img
                   src={`/avatars/${winner.avatar || 1}.png`}
                   alt={`${winner.name}'s avatar`}
                   className="w-40 h-40 rounded-full border-6 border-yellow-400 shadow-2xl shadow-yellow-500/40 animate-bounce"
                   onError={(e) => {
-                    ;(e.target as HTMLImageElement).src = "/avatars/1.png"
+                    ; (e.target as HTMLImageElement).src = "/avatars/1.png"
                   }}
                 />
                 <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-ping">
@@ -89,7 +89,7 @@ export function FinishedView() {
                 <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full animate-pulse"></div>
                 <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full animate-pulse animation-delay-500"></div>
               </div>
-              
+
               <p className="text-yellow-400 font-bold text-xl">{winner.name}</p>
             </div>
             <div className="text-center">
@@ -192,14 +192,13 @@ export function FinishedView() {
           <Button
             onClick={handleAutoJoinNext}
             disabled={!currentPlayer?.name || hasJoined}
-            className={`w-full h-12 font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl rounded-2xl ${
-              hasJoined 
-                ? "bg-green-600 text-white cursor-not-allowed"
-                : "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white hover:shadow-purple-500/30"
-            }`}
+            className={`w-full h-12 font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl rounded-2xl ${hasJoined
+              ? "bg-green-600 text-white cursor-not-allowed"
+              : "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white hover:shadow-purple-500/30"
+              }`}
           >
             <RefreshCw className="w-5 h-5 mr-2" />
-            {hasJoined ? "Joined!" : "Join Next Game"}
+            {hasJoined ? "Joined!" : "Join Next"}
           </Button>
         </div>
       </div>

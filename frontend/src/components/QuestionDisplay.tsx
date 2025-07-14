@@ -1,5 +1,5 @@
 import { useGameStore } from "@/store/gameStore"
-import { HelpCircle, Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react"
 
 export function QuestionDisplay() {
   const question = useGameStore((state) => state.gameState.currentQuestion)
@@ -26,8 +26,8 @@ export function QuestionDisplay() {
   return (
     <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl rounded-xl border border-slate-600/50 p-4 shadow-xl animate-in slide-in-from-top duration-500">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-          <HelpCircle className="w-4 h-4 text-white" />
+        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-sm font-bold text-white leading-tight mb-1">{question.question}</h2>

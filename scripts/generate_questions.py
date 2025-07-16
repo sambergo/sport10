@@ -36,13 +36,14 @@ def generate_questions(category, difficulty, count=5):
     logger.debug(f"API key found: {api_key[:10]}...{api_key[-4:]}")
     client = genai.Client(api_key=api_key)
 
-    prompt = f"""Generate {count} trivia questions for a Smart10-style game. Each question should follow this format:
+    prompt = f"""Generate {count} trivia questions for a Smart10-style game. Each question should be a clear and direct topic.
 
 Category: {category}
 Difficulty: {difficulty}
 
 Requirements:
-- Each question should ask "Which of the following are [description]?"
+- The "question" should be a direct topic, not a full interrogative sentence. For example, instead of "Which of the following players have won the Ballon d'Or?", the question should be "Ballon d'Or Winners".
+- Avoid unnecessary filler phrases like "Which of the following are..." or "Identify the...". The topic itself should be the question.
 - Provide exactly 10 answer options per question
 - 1-10 options should be correct answers
 - 0-9 options should be incorrect but plausible answers
@@ -52,7 +53,7 @@ Requirements:
 Return the response as a JSON array with this exact structure:
 [
   {{
-    "question": "Which of the following are [description]?",
+    "question": "Direct Topic Name",
     "options": [
       {{"text": "Option 1", "isCorrect": true}},
       {{"text": "Option 2", "isCorrect": false}},

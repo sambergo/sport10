@@ -518,7 +518,7 @@ def generate_batch():
     ]
 
     # difficulties = ["Easy", "Medium", "Hard"]
-    difficulties = ["Hard"]
+    difficulties = ["Medium", "Hard"]
 
     # Check for API key
     if not os.environ.get("GEMINI_API_KEY"):
